@@ -18,7 +18,7 @@ const LoginForm = () => {
     setError('')
     signIn({ email, password })
       .then(() => {
-        navigate('/', { replace: true })
+        navigate('/boards', { replace: true })
       })
       .catch((error) => {
         setError(error.code)
