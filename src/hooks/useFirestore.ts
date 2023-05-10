@@ -1,10 +1,13 @@
-import { collection, setDoc, getDocs, doc, getDoc } from 'firebase/firestore'
+import { collection, setDoc, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
-type AddToDoc = {
+type RemoveFromDoc = {
   collectionId: string
-  data: { [key: string]: any }
   id: string
+}
+
+type AddToDoc = RemoveFromDoc & {
+  data: { [key: string]: any }
 }
 
 type GetCollection = {
@@ -16,6 +19,8 @@ type GetSingleCollectionItem = GetCollection & {
 const UseFirestore = () => {
   const addToDoc = ({ data, collectionId, id }: AddToDoc) =>
     setDoc(doc(collection(db, collectionId), id), data)
+  const removeFromDoc = ({ collectionId, id }: RemoveFromDoc) =>
+    deleteDoc(doc(collection(db, collectionId), id))
 
   const getCollection = ({ collectionId }: GetCollection) => {
     return getDocs(collection(db, collectionId)).then((docRefs) => {
@@ -39,7 +44,7 @@ const UseFirestore = () => {
     })
   }
 
-  return { getCollection, addToDoc, getSingleCollectionItem }
+  return { getCollection, addToDoc, removeFromDoc, getSingleCollectionItem }
 }
 
 export default UseFirestore

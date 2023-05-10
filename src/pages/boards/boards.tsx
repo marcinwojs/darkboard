@@ -8,6 +8,8 @@ import LoginIcon from '@mui/icons-material/Login'
 import { useNavigate } from 'react-router-dom'
 import useCreateBoard from '../../hooks/useCreateBoard'
 import humanId from 'human-id'
+import useRemoveBoard from '../../hooks/useRemoveBoard'
+import {DeleteForever} from '@mui/icons-material';
 
 type BoardEntityUser = {
   userName: string
@@ -28,7 +30,7 @@ const Boards = () => {
   const { getCollection } = useFirestore()
   const [boardsCollection, setBoardCollection] = useState<BoardEntity[]>([])
   const { createBoard } = useCreateBoard()
-
+  const { removeBoard } = useRemoveBoard()
   const updateBoardList = () => {
     getCollection({ collectionId: 'boards' }).then((data: BoardEntity[]) => {
       setBoardCollection(data)
@@ -47,6 +49,10 @@ const Boards = () => {
     createBoard({ boardName: humanId() }).then(() => updateBoardList())
   }
 
+  const onRemoveBoard = (id: string) => {
+    removeBoard(id).then(() => updateBoardList())
+  }
+
   return (
     <Stack my={5} alignItems='center'>
       <List sx={{ bgcolor: theme.palette.grey['A200'], my: 10, borderRadius: 2, width: '400px' }}>
@@ -61,6 +67,9 @@ const Boards = () => {
                 <ListItemText primary={boardName} />
                 <Button onClick={() => navigateToBoard(boardId)}>
                   <LoginIcon />
+                </Button>
+                <Button onClick={() => onRemoveBoard(boardId)}>
+                  <DeleteForever />
                 </Button>
               </ListItem>
               <Divider />

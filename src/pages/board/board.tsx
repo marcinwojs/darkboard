@@ -23,7 +23,9 @@ export default function Board() {
 
   const onMount = useCallback((app: App) => {
     getSingleCollectionItem({ collectionId: 'boardsContent', id: instanceId }).then((data) => {
-      app.replaceStoreContentsWithRecordsForOtherDocument(data?.records || [])
+      app.store.mergeRemoteChanges(() => {
+        app.store.put(data?.records || [])
+      })
     })
   }, [])
 
