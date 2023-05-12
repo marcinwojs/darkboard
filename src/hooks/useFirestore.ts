@@ -1,4 +1,4 @@
-import { collection, setDoc, getDocs, doc, getDoc, deleteDoc } from 'firebase/firestore'
+import { collection, setDoc, getDocs, doc, getDoc, deleteDoc, onSnapshot } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
 type RemoveFromDoc = {
@@ -44,7 +44,13 @@ const UseFirestore = () => {
     })
   }
 
-  return { getCollection, addToDoc, removeFromDoc, getSingleCollectionItem }
+  function subToData<T>(collectionId: string, id: string, callback: (data: T) => void) {
+    onSnapshot(doc(db, collectionId, id), (doc) => {
+      return callback(doc.data() as T)
+    })
+  }
+
+  return { getCollection, addToDoc, removeFromDoc, getSingleCollectionItem, subToData }
 }
 
 export default UseFirestore
