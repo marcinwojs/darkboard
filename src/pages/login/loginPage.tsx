@@ -6,6 +6,7 @@ import { signInWithGoogle } from '../../config/firebase'
 import { useNavigate } from 'react-router-dom'
 import { useContext, useEffect } from 'react'
 import { FirebaseUserContext, FirebaseUserContextType } from '../../providers/firebaseUserProvider'
+import useFirestoreUser from '../../hooks/useFirestoreUser'
 
 const StyledContent = styled('div')(({ theme }) => ({
   maxWidth: 480,
@@ -18,6 +19,7 @@ const StyledContent = styled('div')(({ theme }) => ({
 }))
 
 const LoginPage = (): JSX.Element => {
+  const { addUser, getUserData } = useFirestoreUser()
   const navigate = useNavigate()
   const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
 
@@ -28,7 +30,16 @@ const LoginPage = (): JSX.Element => {
   })
 
   const onSignGoogle = () => {
-    signInWithGoogle().then(() => {
+    signInWithGoogle().then(({ user }) => {
+      const { uid, email, displayName } = user
+      getUserData(uid).catch(() => {
+        addUser({
+          email: email || 'gmail',
+          id: uid,
+          firstName: displayName || 'name',
+          userBoards: [],
+        })
+      })
       navigate('/boards', { replace: true })
     })
   }

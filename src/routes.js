@@ -6,6 +6,7 @@ import HomePage from './pages/home/homePage'
 import Board from './pages/board/board'
 import Boards from './pages/boards/boards'
 import LayoutWrapper from './layout/layoutWrapper'
+import WebsocketProvider from './providers/websocketProvider'
 
 export default function Router() {
   const routes = useRoutes([
@@ -20,9 +21,11 @@ export default function Router() {
     {
       path: '/board/:boardId',
       element: (
-        <LayoutWrapper>
-          <Board />
-        </LayoutWrapper>
+        <WebsocketProvider>
+          <LayoutWrapper>
+            <Board />
+          </LayoutWrapper>
+        </WebsocketProvider>
       ),
     },
     {

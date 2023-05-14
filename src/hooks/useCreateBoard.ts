@@ -2,12 +2,14 @@ import { TLInstance } from '@tldraw/tldraw'
 import useFirestore from './useFirestore'
 import { useContext } from 'react'
 import { FirebaseUserContext, FirebaseUserContextType } from '../providers/firebaseUserProvider'
+import useFirestoreUser from './useFirestoreUser'
 
 type NewBoardProps = {
   boardName: string
 }
 
 const useCreateBoard = () => {
+  const { updateUserData, getUserData } = useFirestoreUser()
   const { addToDoc } = useFirestore()
   const instanceId = TLInstance.createId()
   const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
@@ -18,7 +20,7 @@ const useCreateBoard = () => {
         boardName: boardName,
         boardId: instanceId,
         creatorId: user?.id,
-        records: [],
+        users: [{ name: user?.firstName || '', id: user?.id || '', creator: true }],
       }
 
       return addToDoc({
@@ -27,7 +29,21 @@ const useCreateBoard = () => {
         id: instanceId,
       })
         .then(() => {
-          myResolve(instanceId)
+          addToDoc({ collectionId: 'boardsContent', id: instanceId, data: { elements: [] } })
+            .then(() => {
+              getUserData(user?.id || '')
+                .then((data) => {
+                  const newUserData = data
+                  newUserData.userBoards.push({ id: instanceId, name: boardName, own: true })
+                  updateUserData(user?.id || '', newUserData)
+                    .then(() => {
+                      myResolve(instanceId)
+                    })
+                    .catch((reason: any) => myReject(reason))
+                })
+                .catch((reason) => myReject(reason))
+            })
+            .catch((reason) => myReject(reason))
         })
         .catch((reason) => myReject(reason))
     })

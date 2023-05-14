@@ -1,4 +1,13 @@
-import { collection, setDoc, getDocs, doc, getDoc, deleteDoc, onSnapshot } from 'firebase/firestore'
+import {
+  collection,
+  setDoc,
+  getDocs,
+  doc,
+  getDoc,
+  deleteDoc,
+  onSnapshot,
+  updateDoc,
+} from 'firebase/firestore'
 import { db } from '../config/firebase'
 
 type RemoveFromDoc = {
@@ -19,6 +28,10 @@ type GetSingleCollectionItem = GetCollection & {
 const UseFirestore = () => {
   const addToDoc = ({ data, collectionId, id }: AddToDoc) =>
     setDoc(doc(collection(db, collectionId), id), data)
+
+  const updateDocField = ({ data, collectionId, id }: AddToDoc) =>
+    updateDoc(doc(db, collectionId, id), data)
+
   const removeFromDoc = ({ collectionId, id }: RemoveFromDoc) =>
     deleteDoc(doc(collection(db, collectionId), id))
 
@@ -39,7 +52,7 @@ const UseFirestore = () => {
     const docRef = doc(db, collectionId, id)
     return getDoc(docRef).then((docSnap) => {
       const data = docSnap.exists() ? docSnap.data() : null
-      if (data === null || data === undefined) return null
+      if (data === null || data === undefined) throw new Error('No data in database')
       return data
     })
   }
@@ -50,7 +63,14 @@ const UseFirestore = () => {
     })
   }
 
-  return { getCollection, addToDoc, removeFromDoc, getSingleCollectionItem, subToData }
+  return {
+    getCollection,
+    addToDoc,
+    updateDocField,
+    removeFromDoc,
+    getSingleCollectionItem,
+    subToData,
+  }
 }
 
 export default UseFirestore

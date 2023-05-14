@@ -1,6 +1,7 @@
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth'
 import { auth } from '../config/firebase'
 import useFirestore from './useFirestore'
+import { UserEntity } from './useFirestoreUser'
 
 type SignIn = {
   email: string
@@ -16,10 +17,11 @@ const UseAuthorization = () => {
   const signIn = ({ email, password }: SignIn) => signInWithEmailAndPassword(auth, email, password)
   const signUp = ({ email, password, firstName }: SignUp) => {
     return createUserWithEmailAndPassword(auth, email, password).then((userCredential) => {
-      const data = {
+      const data: UserEntity = {
         email: email,
         firstName: firstName,
         id: userCredential.user.uid,
+        userBoards: [],
       }
       return addToDoc({
         collectionId: 'users',

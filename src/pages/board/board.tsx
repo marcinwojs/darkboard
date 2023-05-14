@@ -1,20 +1,22 @@
 import { TLInstanceId } from '@tldraw/tldraw'
 import '@tldraw/tldraw/editor.css'
 import '@tldraw/tldraw/ui.css'
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useContext } from 'react'
 import useFirestore from '../../hooks/useFirestore'
 import { Box, LinearProgress, Stack, Typography } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { Excalidraw } from '@excalidraw/excalidraw'
 import {
-  ExcalidrawAPIRefValue,
   ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState,
 } from '@excalidraw/excalidraw/types/types'
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
 import { throttle } from 'lodash'
-import { default as SocketIOClient, io } from 'socket.io-client'
 import { Socket } from 'net'
+import { WebsocketContext, WebsocketContextType } from '../../providers/websocketProvider'
+import UserList from '../board/components/usersList/userList'
+import useBoardRoom from '../../hooks/useBoardRoom'
+import { FirebaseUserContext, FirebaseUserContextType } from '../../providers/firebaseUserProvider'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)
@@ -26,34 +28,34 @@ type Props = ExcalidrawInitialDataState & {
   socket: Socket
 }
 
-const socket = io('http://localhost:3002/')
-
 export function Board({ elements, socket }: Props) {
   const instanceId = useParams()?.boardId as TLInstanceId
   const { addToDoc, subToData } = useFirestore()
   const [excalidrawAPI, excalidrawRefCallback] = useCallbackRefState<ExcalidrawImperativeAPI>()
-  const [newsestChanges, setNewestChanges] = useState(true)
+  const [newsestChanges, setNewestChanges] = useState('')
 
   useEffect(() => {
     if (excalidrawAPI && socket) {
       socket.on('client-change', (freshElements) => {
         excalidrawAPI?.updateScene({ elements: freshElements })
-        setNewestChanges(true)
+        setNewestChanges(JSON.stringify(freshElements))
       })
     }
-  })
+  }, [excalidrawAPI])
 
-  console.log(excalidrawAPI)
   const onChange = (elements: readonly ExcalidrawElement[]) => {
-    throttle(() => {
-      addToDoc({
-        collectionId: 'boardsContent',
-        data: { elements },
-        id: instanceId,
-      }).then(() => {
-        socket.emit('server-change', elements, instanceId)
-      })
-    }, 500)()
+    const newNewest = JSON.stringify(elements)
+    if (newsestChanges !== newNewest) {
+      socket.emit('server-change', elements, instanceId)
+      setNewestChanges(newNewest)
+      throttle(() => {
+        addToDoc({
+          collectionId: 'boardsContent',
+          data: { elements },
+          id: instanceId,
+        })
+      }, 50)()
+    }
   }
 
   return (
@@ -62,19 +64,28 @@ export function Board({ elements, socket }: Props) {
         ref={(api) => excalidrawRefCallback(api as ExcalidrawImperativeAPI)}
         initialData={{ elements }}
         onChange={(elements) => onChange(elements)}
-      />
+      >
+        <UserList />
+      </Excalidraw>
     </Box>
   )
 }
 
 const LoadBoard = () => {
+  const { joinRoom } = useBoardRoom()
+  const { socket } = useContext(WebsocketContext) as WebsocketContextType
   const instanceId = useParams()?.boardId as TLInstanceId
   const [elements, setElements] = useState<ExcalidrawInitialDataState['elements'] | null>(null)
   const { getSingleCollectionItem } = useFirestore()
+  const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
 
   useEffect(() => {
-    socket.connect()
-    socket.emit('join-room', instanceId)
+    if (user) {
+      joinRoom(instanceId, user?.id).then(() => {
+        socket.connect()
+        socket.emit('join-room', instanceId)
+      })
+    }
   }, [])
 
   useEffect(() => {
@@ -83,7 +94,7 @@ const LoadBoard = () => {
     })
   }, [])
 
-  return elements ? (
+  return elements && socket ? (
     <Board elements={elements} socket={socket as unknown as Socket} />
   ) : (
     <Stack m={10} spacing={2}>

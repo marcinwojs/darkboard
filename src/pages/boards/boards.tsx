@@ -1,45 +1,37 @@
-import useFirestore from '../../hooks/useFirestore'
 import { Button, Divider, Stack, Typography, useTheme } from '@mui/material'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useContext, useEffect, useState } from 'react'
 import LoginIcon from '@mui/icons-material/Login'
 import { useNavigate } from 'react-router-dom'
 import useCreateBoard from '../../hooks/useCreateBoard'
 import humanId from 'human-id'
 import useRemoveBoard from '../../hooks/useRemoveBoard'
-import {DeleteForever} from '@mui/icons-material';
-
-type BoardEntityUser = {
-  userName: string
-  userId: string
-  mail: string
-}
-
-type BoardEntity = {
-  boardName: string
-  boardId: string
-  creator: string
-  users: BoardEntityUser[]
-}
+import { DeleteForever } from '@mui/icons-material'
+import useFirestoreUser, { UserBoardEntity } from '../../hooks/useFirestoreUser'
+import { FirebaseUserContext, FirebaseUserContextType } from '../../providers/firebaseUserProvider'
 
 const Boards = () => {
+  const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
   const navigate = useNavigate()
   const theme = useTheme()
-  const { getCollection } = useFirestore()
-  const [boardsCollection, setBoardCollection] = useState<BoardEntity[]>([])
+  const { getUserData } = useFirestoreUser()
+  const [boardsCollection, setBoardCollection] = useState<UserBoardEntity[]>([])
   const { createBoard } = useCreateBoard()
   const { removeBoard } = useRemoveBoard()
+
   const updateBoardList = () => {
-    getCollection({ collectionId: 'boards' }).then((data: BoardEntity[]) => {
-      setBoardCollection(data)
+    getUserData(user?.id || '').then(({ userBoards }) => {
+      setBoardCollection(userBoards)
     })
   }
 
   useEffect(() => {
-    updateBoardList()
-  }, [])
+    if (user?.id) {
+      updateBoardList()
+    }
+  }, [user])
 
   const navigateToBoard = (id: string) => {
     navigate(`/board/${id}`, { replace: true })
@@ -50,36 +42,71 @@ const Boards = () => {
   }
 
   const onRemoveBoard = (id: string) => {
-    removeBoard(id).then(() => updateBoardList())
+    if (user) removeBoard(user?.id, id).then(() => updateBoardList())
   }
 
+  const groupedBoards = boardsCollection.reduce(
+    (acc, curr) => {
+      const key = curr.own ? 'own' : 'membership'
+      if (!acc[key]) {
+        acc[key] = []
+      }
+      acc[key].push(curr)
+      return acc
+    },
+    { own: [], membership: [] } as { own: UserBoardEntity[]; membership: UserBoardEntity[] },
+  )
+
   return (
-    <Stack my={5} alignItems='center'>
-      <List sx={{ bgcolor: theme.palette.grey['A200'], my: 10, borderRadius: 2, width: '400px' }}>
-        <Typography textAlign={'center'} variant={'h5'}>
-          Boards List:
-        </Typography>
-        <Divider />
-        {boardsCollection.map(({ boardName, boardId }) => {
-          return (
-            <Fragment key={boardId}>
-              <ListItem>
-                <ListItemText primary={boardName} />
-                <Button onClick={() => navigateToBoard(boardId)}>
-                  <LoginIcon />
-                </Button>
-                <Button onClick={() => onRemoveBoard(boardId)}>
-                  <DeleteForever />
-                </Button>
-              </ListItem>
-              <Divider />
-            </Fragment>
-          )
-        })}
-      </List>
-      <Button sx={{ bgcolor: theme.palette.grey['A200'] }} onClick={onCreateBoard}>
-        <Typography variant={'h5'}>New Board</Typography>
-      </Button>
+    <Stack>
+      <Stack my={5} alignItems='center'>
+        <List sx={{ bgcolor: theme.palette.grey['A200'], my: 10, borderRadius: 2, width: '400px' }}>
+          <Typography textAlign={'center'} variant={'h5'}>
+            You Boards List:
+          </Typography>
+          <Divider />
+          {groupedBoards.own.map(({ name, id, own }) => {
+            return own ? (
+              <Fragment key={id}>
+                <ListItem>
+                  <ListItemText primary={name} />
+                  <Button onClick={() => navigateToBoard(id)}>
+                    <LoginIcon />
+                  </Button>
+                  <Button onClick={() => onRemoveBoard(id)}>
+                    <DeleteForever />
+                  </Button>
+                </ListItem>
+                <Divider />
+              </Fragment>
+            ) : null
+          })}
+        </List>
+        <Button sx={{ bgcolor: theme.palette.grey['A200'] }} onClick={onCreateBoard}>
+          <Typography variant={'h5'}>New Board</Typography>
+        </Button>
+      </Stack>
+      <Stack my={5} alignItems='center'>
+        <List sx={{ bgcolor: theme.palette.grey['A200'], my: 10, borderRadius: 2, width: '400px' }}>
+          <Typography textAlign={'center'} variant={'h5'}>
+            Membership Boards List:
+          </Typography>
+          <Divider />
+          {groupedBoards.membership.map(({ name, id, own }) => {
+            return !own ? (
+              <Fragment key={id}>
+                <ListItem>
+                  <ListItemText primary={name} />
+                  <Button onClick={() => navigateToBoard(id)}>
+                    <LoginIcon />
+                  </Button>
+                </ListItem>
+                <Divider />
+              </Fragment>
+            ) : null
+          })}
+        </List>
+      </Stack>
     </Stack>
   )
 }

@@ -1,15 +1,24 @@
 import useFirestore from './useFirestore'
+import useFirestoreUser from './useFirestoreUser'
 
 const useRemoveBoard = () => {
+  const { updateUserData, getUserData } = useFirestoreUser()
   const { removeFromDoc } = useFirestore()
 
-  const removeBoard = (id: string) => {
+  const removeBoard = (userId: string, id: string) => {
     return new Promise(function (myResolve, myReject) {
       return removeFromDoc({
         collectionId: 'boards',
         id,
       })
         .then(() => {
+          getUserData(userId)
+            .then((userData) => {
+              updateUserData(userData.id, {
+                userBoards: userData.userBoards.filter((board) => board.id !== id),
+              })
+            })
+            .catch((reason) => myReject(reason))
           myResolve(true)
         })
         .catch((reason) => myReject(reason))

@@ -1,9 +1,10 @@
 import { Button, Container, Link, Stack, Typography, useTheme } from '@mui/material'
 import useAuthorization from '../hooks/useAuthorization'
 import { useNavigate } from 'react-router-dom'
-import { ReactNode, useContext } from 'react'
+import {ReactNode, useContext, useEffect, useLayoutEffect} from 'react'
 import { FirebaseUserContext, FirebaseUserContextType } from '../providers/firebaseUserProvider'
 import Avatar from '@mui/material/Avatar'
+import { auth } from '../config/firebase'
 
 type Props = {
   children: ReactNode
@@ -14,12 +15,12 @@ const LayoutWrapper = ({ children }: Props) => {
   const theme = useTheme()
   const { logout } = useAuthorization()
   const navigate = useNavigate()
-
   const onLogout = () => {
     logout().then(() => {
       navigate('/', { replace: true })
     })
   }
+
 
   return (
     <Stack height={'100vh'} width={'100vw'}>
