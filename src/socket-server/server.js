@@ -45,6 +45,10 @@ function startServer() {
       socket.in(roomId).emit('client-change', elements)
     })
 
+    socket.on('server-change-collaborators', (collaborator, roomId) => {
+      socket.in(roomId).emit('client-change-collaborators', collaborator)
+    })
+
     socket.on('disconnect', () => {
       socket.in(roomId).emit('users:update')
     })

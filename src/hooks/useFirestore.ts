@@ -7,6 +7,7 @@ import {
   deleteDoc,
   onSnapshot,
   updateDoc,
+    arrayRemove
 } from 'firebase/firestore'
 import { db } from '../config/firebase'
 

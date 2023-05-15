@@ -1,5 +1,6 @@
 import useFirestoreUser from './useFirestoreUser'
 import useFirestore from './useFirestore'
+import { arrayUnion } from 'firebase/firestore'
 
 const useBoardRoom = () => {
   const { updateUserData, getUserData } = useFirestoreUser()
@@ -16,7 +17,7 @@ const useBoardRoom = () => {
             id: roomId,
             data: {
               ...board,
-              users: board.users.push({
+              users: arrayUnion({
                 name: userData.firstName,
                 id: userData.id,
                 creator: false,
