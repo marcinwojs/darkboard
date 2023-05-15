@@ -21,9 +21,7 @@ const useFirestoreUser = () => {
   }
 
   const updateUserData = (id: string, userData: Partial<UserEntity>) => {
-    return getUserData(id).then((prevUserData) => {
-      return updateDoc(doc(db, 'users', id), { ...prevUserData, ...userData })
-    })
+    return updateDoc(doc(db, 'users', id), userData)
   }
 
   const addUser = (userData: UserEntity) => {

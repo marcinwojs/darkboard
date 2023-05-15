@@ -6,6 +6,8 @@ import useFirestore from '../../hooks/useFirestore'
 import { Box, LinearProgress, Stack, Typography } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { Excalidraw } from '@excalidraw/excalidraw'
+import { set, ref, onValue } from 'firebase/database'
+
 import {
   Collaborator,
   ExcalidrawImperativeAPI,
@@ -17,6 +19,7 @@ import { Socket } from 'net'
 import { WebsocketContext, WebsocketContextType } from '../../providers/websocketProvider'
 import useBoardRoom from '../../hooks/useBoardRoom'
 import { FirebaseUserContext, FirebaseUserContextType } from '../../providers/firebaseUserProvider'
+import { rdb } from '../../config/firebase'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)
@@ -47,19 +50,24 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
         collaboratorsMap?.set(collaborator.id, collaborator)
         excalidrawAPI?.updateScene({ collaborators: collaboratorsMap })
       })
+
+      onValue(ref(rdb, 'border'), (snapshot) => {
+        const data = snapshot.val()
+        console.log(data)
+      })
     }
   }, [excalidrawAPI])
 
   const onChange = (elements: readonly ExcalidrawElement[]) => {
     const newNewest = JSON.stringify(elements)
     if (newsestChanges !== newNewest) {
-      throttle(() => {
-        updateDocField({
-          collectionId: 'boardsContent',
-          data: { elements },
-          id: instanceId,
-        })
-      }, 50)()
+      // throttle(() => {
+      //   updateDocField({
+      //     collectionId: 'boardsContent',
+      //     data: { elements },
+      //     id: instanceId,
+      //   })
+      // }, 500)()
       socket.emit('server-change', elements, instanceId)
       setNewestChanges(newNewest)
     }
@@ -75,16 +83,20 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
     throttle(() => {
       const collaborator = { pointer, button, username: user?.firstName || '', id: user?.id }
 
-      updateDocField({
-        collectionId: 'boardsContent',
-        data: {
-          [`collaborators.${collaborator.id}`]: collaborator,
-        },
-        id: instanceId,
+      console.log('update')
+      set(ref(rdb, 'border'), {
+        pointer,
       })
+      // updateDocField({
+      //   collectionId: 'boardsContent',
+      //   data: {
+      //     [`collaborators.${collaborator.id}`]: collaborator,
+      //   },
+      //   id: instanceId,
+      // })
 
       socket.emit('server-change-collaborators', collaborator, instanceId)
-    }, 100)()
+    }, 1000)()
   }
 
   return (
@@ -95,8 +107,7 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
         initialData={{ elements, appState }}
         onChange={(elements) => onChange(elements)}
         onPointerUpdate={onPointerChange}
-      >
-      </Excalidraw>
+      ></Excalidraw>
     </Box>
   )
 }

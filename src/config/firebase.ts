@@ -11,6 +11,7 @@ import {
   firebaseProjectId,
   firebaseStorageBucket,
 } from './appConfig'
+import { getDatabase } from 'firebase/database'
 
 const firebaseConfig = {
   apiKey: firebaseApiKey,
@@ -32,7 +33,8 @@ provider.setCustomParameters({ prompt: 'select_account' })
 const signInWithGoogle = () => signInWithPopup(auth, provider)
 
 const db = getFirestore(app)
+const rdb = getDatabase(app)
 
-export { db, signInWithGoogle, auth }
+export { db, rdb, signInWithGoogle, auth }
 
 export default app

@@ -25,8 +25,10 @@ const useBoardRoom = () => {
             },
           }).then(() => {
             return updateUserData(userId, {
-              ...userData,
-              userBoards: [...userData.userBoards, { id: roomId, name: board.name, own: false }],
+              userBoards: [
+                ...userData.userBoards,
+                { id: roomId, name: board.boardName, own: false },
+              ],
             }).then(() => board)
           })
         })

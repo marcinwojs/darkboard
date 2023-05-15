@@ -34,7 +34,6 @@ function startServer() {
       try {
         socket.join(roomID)
         roomId = roomID
-
         socket.in(roomID).emit('users:update')
       } catch (e) {
         console.log('join error')
