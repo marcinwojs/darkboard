@@ -6,15 +6,13 @@ import useFirestore from '../../hooks/useFirestore'
 import { Box, LinearProgress, Stack, Typography } from '@mui/material'
 import { useParams } from 'react-router-dom'
 import { Excalidraw } from '@excalidraw/excalidraw'
-import { set, ref, onValue } from 'firebase/database'
-
+import { ref, onValue, update, onDisconnect } from 'firebase/database'
 import {
-  Collaborator,
   ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState,
 } from '@excalidraw/excalidraw/types/types'
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
-import { throttle } from 'lodash'
+import { debounce } from 'lodash'
 import { Socket } from 'net'
 import { WebsocketContext, WebsocketContextType } from '../../providers/websocketProvider'
 import useBoardRoom from '../../hooks/useBoardRoom'
@@ -36,40 +34,58 @@ type Props = ExcalidrawInitialDataState & {
 export function Board({ elements, appState, user, socket, instanceId }: Props) {
   const { updateDocField } = useFirestore()
   const [excalidrawAPI, excalidrawRefCallback] = useCallbackRefState<ExcalidrawImperativeAPI>()
-  const [newsestChanges, setNewestChanges] = useState('')
-  const collaboratorsMap = appState?.collaborators
+  const oldElementsMap = new Map(elements?.map((e) => [e.id, e]))
 
   useEffect(() => {
     if (excalidrawAPI && socket) {
-      socket.on('client-change', (freshElements) => {
-        excalidrawAPI?.updateScene({ elements: freshElements })
-        setNewestChanges(JSON.stringify(freshElements))
+      socket.on('client-change', (elements) => {
+        elements.forEach((e: ExcalidrawElement) => oldElementsMap.set(e.id, e))
+        excalidrawAPI?.updateScene({ elements: Array.from(oldElementsMap.values()) })
       })
 
-      socket.on('client-change-collaborators', (collaborator) => {
-        collaboratorsMap?.set(collaborator.id, collaborator)
-        excalidrawAPI?.updateScene({ collaborators: collaboratorsMap })
-      })
+      onValue(ref(rdb, `pointer-update/${instanceId}`), (snapshot) => {
+        if (user) {
+          const data = snapshot.val() || {}
+          delete data[user?.id]
 
-      onValue(ref(rdb, 'border'), (snapshot) => {
-        const data = snapshot.val()
-        console.log(data)
+          excalidrawAPI?.updateScene({ collaborators: new Map(Object.entries(data)) })
+          const myConnectionsRef = ref(rdb, `pointer-update/${instanceId}/${user.id}`)
+          onDisconnect(myConnectionsRef).remove()
+        }
       })
     }
   }, [excalidrawAPI])
 
   const onChange = (elements: readonly ExcalidrawElement[]) => {
-    const newNewest = JSON.stringify(elements)
-    if (newsestChanges !== newNewest) {
-      throttle(() => {
-        updateDocField({
-          collectionId: 'boardsContent',
-          data: { elements },
-          id: instanceId,
-        })
-      }, 500)()
-      socket.emit('server-change', elements, instanceId)
-      setNewestChanges(newNewest)
+    const diffs: ExcalidrawElement[] = []
+
+    elements.forEach((element) => {
+      if (oldElementsMap.get(element.id)?.version !== element.version) {
+        diffs.push(element)
+        oldElementsMap.set(element.id, { ...element })
+      }
+    })
+
+    if (diffs.length > 0) {
+      const serializedElements = [...elements].map((element) => {
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const points = element?.points
+
+        if (points) {
+          return {
+            ...element,
+            points: JSON.stringify(points),
+          }
+        } else return element
+      })
+
+      updateDocField({
+        collectionId: 'boardsContent',
+        data: { elements: serializedElements },
+        id: instanceId,
+      })
+      socket.emit('server-change', diffs, instanceId)
     }
   }
 
@@ -80,21 +96,11 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
     pointer: { x: number; y: number }
     button: 'down' | 'up'
   }) => {
-    throttle(() => {
-      const collaborator = { pointer, button, username: user?.firstName || '', id: user?.id }
-      set(ref(rdb, 'border'), {
-        pointer,
+    if (user) {
+      update(ref(rdb, `pointer-update/${instanceId}`), {
+        [`${user?.id}`]: { pointer, button, username: user?.firstName || '', id: user?.id },
       })
-      updateDocField({
-        collectionId: 'boardsContent',
-        data: {
-          [`collaborators.${collaborator.id}`]: collaborator,
-        },
-        id: instanceId,
-      })
-
-      socket.emit('server-change-collaborators', collaborator, instanceId)
-    }, 1000)()
+    }
   }
 
   return (
@@ -103,9 +109,15 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
         autoFocus
         ref={(api) => excalidrawRefCallback(api as ExcalidrawImperativeAPI)}
         initialData={{ elements, appState }}
-        onChange={(elements) => onChange(elements)}
-        onPointerUpdate={onPointerChange}
-      ></Excalidraw>
+        onChange={(elements, appState) => {
+          if (appState.cursorButton === 'down') {
+            debounce(() => {
+              onChange(elements)
+            }, 100)()
+          }
+        }}
+        onPointerUpdate={(payload) => onPointerChange(payload)}
+      />
     </Box>
   )
 }
@@ -115,7 +127,6 @@ const LoadBoard = () => {
   const { socket } = useContext(WebsocketContext) as WebsocketContextType
   const instanceId = useParams()?.boardId as TLInstanceId
   const [elements, setElements] = useState<ExcalidrawInitialDataState['elements'] | null>(null)
-  const [collaborators, setCollaborators] = useState<Map<string, Collaborator>>(new Map())
   const { getSingleCollectionItem } = useFirestore()
   const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
 
@@ -130,14 +141,17 @@ const LoadBoard = () => {
 
   useEffect(() => {
     getSingleCollectionItem({ collectionId: 'boardsContent', id: instanceId }).then((data) => {
-      const { collaborators, elements } = data
-      if (collaborators && user) {
-        delete collaborators[user?.id]
-        setCollaborators(new Map(Object.entries(collaborators)))
-      }
-      if (elements) {
-        setElements(elements)
-      }
+      const deserializedElements = [...data.elements].map((element) => {
+        const points = element?.points
+        if (points) {
+          return {
+            ...element,
+            points: JSON.parse(points),
+          }
+        } else return element
+      })
+
+      setElements(deserializedElements)
     })
   }, [])
 
@@ -145,7 +159,6 @@ const LoadBoard = () => {
     <Board
       instanceId={instanceId}
       elements={elements}
-      appState={{ collaborators: collaborators }}
       socket={socket as unknown as Socket}
       user={user}
     />

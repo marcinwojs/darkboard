@@ -28,12 +28,9 @@ function startServer() {
   })
 
   io.on('connection', (socket) => {
-    let roomId
-
     socket.on('join-room', (roomID) => {
       try {
         socket.join(roomID)
-        roomId = roomID
         socket.in(roomID).emit('users:update')
       } catch (e) {
         console.log('join error')
@@ -43,16 +40,7 @@ function startServer() {
     socket.on('server-change', (elements, roomId) => {
       socket.in(roomId).emit('client-change', elements)
     })
-
-    socket.on('server-change-collaborators', (collaborator, roomId) => {
-      socket.in(roomId).emit('client-change-collaborators', collaborator)
-    })
-
-    socket.on('disconnect', () => {
-      socket.in(roomId).emit('users:update')
-    })
   })
-
   server.listen(SERVER_PORT, () => console.info(`Listening on port ${SERVER_PORT}.`))
 }
 

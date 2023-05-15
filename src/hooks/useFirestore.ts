@@ -7,7 +7,6 @@ import {
   deleteDoc,
   onSnapshot,
   updateDoc,
-    arrayRemove
 } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
@@ -58,19 +57,12 @@ const UseFirestore = () => {
     })
   }
 
-  function subToData<T>(collectionId: string, id: string, callback: (data: T) => void) {
-    onSnapshot(doc(db, collectionId, id), (doc) => {
-      return callback(doc.data() as T)
-    })
-  }
-
   return {
     getCollection,
     addToDoc,
     updateDocField,
     removeFromDoc,
     getSingleCollectionItem,
-    subToData,
   }
 }
 

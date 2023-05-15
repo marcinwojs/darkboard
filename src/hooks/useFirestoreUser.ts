@@ -1,5 +1,5 @@
 import useFirestore from './useFirestore'
-import { collection, doc, setDoc, addDoc, updateDoc, getDoc } from 'firebase/firestore'
+import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
 export type UserBoardEntity = { id: string; name: string; own: boolean }

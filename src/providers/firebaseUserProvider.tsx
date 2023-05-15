@@ -35,7 +35,7 @@ const FirebaseUserProvider: FC<{ children: ReactNode }> = ({ children }) => {
         })
       } else {
         setUser(null)
-        navigate('/')
+        // navigate('/')
         console.log('user is logged out')
       }
     })
