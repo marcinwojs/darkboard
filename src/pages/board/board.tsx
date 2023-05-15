@@ -61,13 +61,13 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
   const onChange = (elements: readonly ExcalidrawElement[]) => {
     const newNewest = JSON.stringify(elements)
     if (newsestChanges !== newNewest) {
-      // throttle(() => {
-      //   updateDocField({
-      //     collectionId: 'boardsContent',
-      //     data: { elements },
-      //     id: instanceId,
-      //   })
-      // }, 500)()
+      throttle(() => {
+        updateDocField({
+          collectionId: 'boardsContent',
+          data: { elements },
+          id: instanceId,
+        })
+      }, 500)()
       socket.emit('server-change', elements, instanceId)
       setNewestChanges(newNewest)
     }
@@ -82,18 +82,16 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
   }) => {
     throttle(() => {
       const collaborator = { pointer, button, username: user?.firstName || '', id: user?.id }
-
-      console.log('update')
       set(ref(rdb, 'border'), {
         pointer,
       })
-      // updateDocField({
-      //   collectionId: 'boardsContent',
-      //   data: {
-      //     [`collaborators.${collaborator.id}`]: collaborator,
-      //   },
-      //   id: instanceId,
-      // })
+      updateDocField({
+        collectionId: 'boardsContent',
+        data: {
+          [`collaborators.${collaborator.id}`]: collaborator,
+        },
+        id: instanceId,
+      })
 
       socket.emit('server-change-collaborators', collaborator, instanceId)
     }, 1000)()
