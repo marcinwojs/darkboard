@@ -1,8 +1,8 @@
-import { TLInstance } from '@tldraw/tldraw'
 import useFirestore from './useFirestore'
 import { useContext } from 'react'
 import { FirebaseUserContext, FirebaseUserContextType } from '../providers/firebaseUserProvider'
 import useFirestoreUser from './useFirestoreUser'
+import humanId from 'human-id'
 
 type NewBoardProps = {
   boardName: string
@@ -11,7 +11,7 @@ type NewBoardProps = {
 const useCreateBoard = () => {
   const { updateUserData, getUserData } = useFirestoreUser()
   const { addToDoc } = useFirestore()
-  const instanceId = TLInstance.createId()
+  const instanceId = humanId()
   const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
 
   const createBoard = ({ boardName }: NewBoardProps) => {

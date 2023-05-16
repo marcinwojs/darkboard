@@ -5,12 +5,11 @@ import ListItemText from '@mui/material/ListItemText'
 import { Fragment, useContext, useEffect, useState } from 'react'
 import LoginIcon from '@mui/icons-material/Login'
 import { useNavigate } from 'react-router-dom'
-import useCreateBoard from '../../hooks/useCreateBoard'
-import humanId from 'human-id'
 import useRemoveBoard from '../../hooks/useRemoveBoard'
 import { DeleteForever } from '@mui/icons-material'
 import useFirestoreUser, { UserBoardEntity } from '../../hooks/useFirestoreUser'
 import { FirebaseUserContext, FirebaseUserContextType } from '../../providers/firebaseUserProvider'
+import NewBoardForm from './components/newBoardForm/newBoardForm'
 
 const Boards = () => {
   const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
@@ -18,7 +17,6 @@ const Boards = () => {
   const theme = useTheme()
   const { getUserData } = useFirestoreUser()
   const [boardsCollection, setBoardCollection] = useState<UserBoardEntity[]>([])
-  const { createBoard } = useCreateBoard()
   const { removeBoard } = useRemoveBoard()
 
   const updateBoardList = () => {
@@ -35,10 +33,6 @@ const Boards = () => {
 
   const navigateToBoard = (id: string) => {
     navigate(`/board/${id}`, { replace: true })
-  }
-
-  const onCreateBoard = () => {
-    createBoard({ boardName: humanId() }).then(() => updateBoardList())
   }
 
   const onRemoveBoard = (id: string) => {
@@ -82,9 +76,7 @@ const Boards = () => {
             ) : null
           })}
         </List>
-        <Button sx={{ bgcolor: theme.palette.grey['A200'] }} onClick={onCreateBoard}>
-          <Typography variant={'h5'}>New Board</Typography>
-        </Button>
+        <NewBoardForm onSuccess={updateBoardList} />
       </Stack>
       <Stack my={5} alignItems='center'>
         <List sx={{ bgcolor: theme.palette.grey['A200'], my: 10, borderRadius: 2, width: '400px' }}>
