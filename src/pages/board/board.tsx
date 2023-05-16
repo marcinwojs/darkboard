@@ -18,6 +18,7 @@ import { WebsocketContext, WebsocketContextType } from '../../providers/websocke
 import useBoardRoom from '../../hooks/useBoardRoom'
 import { FirebaseUserContext, FirebaseUserContextType } from '../../providers/firebaseUserProvider'
 import { rdb } from '../../config/firebase'
+import ShareButton from './components/shareDialog/shareButton'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)
@@ -109,14 +110,13 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
         autoFocus
         ref={(api) => excalidrawRefCallback(api as ExcalidrawImperativeAPI)}
         initialData={{ elements, appState }}
-        onChange={(elements, appState) => {
-          if (appState.cursorButton === 'down') {
-            debounce(() => {
-              onChange(elements)
-            }, 100)()
-          }
+        onChange={(elements) => {
+          debounce(() => {
+            onChange(elements)
+          }, 100)()
         }}
         onPointerUpdate={(payload) => onPointerChange(payload)}
+        renderTopRightUI={() => <ShareButton id={instanceId} />}
       />
     </Box>
   )

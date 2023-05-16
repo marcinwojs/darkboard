@@ -2,12 +2,17 @@ import { Button, Snackbar } from '@mui/material'
 import { useState } from 'react'
 import ShareIcon from '@mui/icons-material/Share'
 
-const ShareDialog = () => {
+type Props = {
+  id: string
+}
+
+const ShareButton = ({ id }: Props) => {
   const [open, setOpen] = useState(false)
+  const shareLink = `${window.location.origin}/board/${id}`
 
   const handleClick = () => {
     setOpen(true)
-    navigator.clipboard.writeText(window.location.href.toString())
+    navigator.clipboard.writeText(shareLink)
   }
 
   return (
@@ -25,4 +30,4 @@ const ShareDialog = () => {
   )
 }
 
-export default ShareDialog
+export default ShareButton

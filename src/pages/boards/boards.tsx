@@ -10,6 +10,7 @@ import { DeleteForever } from '@mui/icons-material'
 import useFirestoreUser, { UserBoardEntity } from '../../hooks/useFirestoreUser'
 import { FirebaseUserContext, FirebaseUserContextType } from '../../providers/firebaseUserProvider'
 import NewBoardForm from './components/newBoardForm/newBoardForm'
+import ShareButton from '../board/components/shareDialog/shareButton'
 
 const Boards = () => {
   const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
@@ -64,6 +65,7 @@ const Boards = () => {
               <Fragment key={id}>
                 <ListItem>
                   <ListItemText primary={name} />
+                  <ShareButton id={id} />
                   <Button onClick={() => navigateToBoard(id)}>
                     <LoginIcon />
                   </Button>
