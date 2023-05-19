@@ -5,39 +5,18 @@ import LoginPage from './pages/login/loginPage'
 import HomePage from './pages/home/homePage'
 import Board from './pages/board/board'
 import Boards from './pages/boards/boards'
-import LayoutWrapper from './layout/layoutWrapper'
 import WebsocketProvider from './providers/websocketProvider'
+import LandingPage from './pages/landing/landingPage'
+import ProtectedRoutes from './components/protectedRoutes/protectedRoutes'
 
 export default function Router() {
   const routes = useRoutes([
     {
-      path: '/users',
-      element: (
-        <LayoutWrapper>
-          <HomePage />
-        </LayoutWrapper>
-      ),
-    },
-    {
-      path: '/board/:boardId',
-      element: (
-        <WebsocketProvider>
-          <LayoutWrapper>
-            <Board />
-          </LayoutWrapper>
-        </WebsocketProvider>
-      ),
-    },
-    {
-      path: '/boards',
-      element: (
-        <LayoutWrapper>
-          <Boards />
-        </LayoutWrapper>
-      ),
-    },
-    {
       path: '/',
+      element: <LandingPage />,
+    },
+    {
+      path: '/login',
       element: <LoginPage />,
     },
     {
@@ -47,6 +26,32 @@ export default function Router() {
     {
       path: '*',
       element: <Page404 />,
+    },
+    {
+      path: '/users',
+      element: (
+        <ProtectedRoutes>
+          <HomePage />
+        </ProtectedRoutes>
+      ),
+    },
+    {
+      path: '/board/:boardId',
+      element: (
+        <ProtectedRoutes>
+          <WebsocketProvider>
+            <Board />
+          </WebsocketProvider>
+        </ProtectedRoutes>
+      ),
+    },
+    {
+      path: '/boards',
+      element: (
+        <ProtectedRoutes>
+          <Boards />
+        </ProtectedRoutes>
+      ),
     },
   ])
 

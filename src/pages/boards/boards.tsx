@@ -2,18 +2,18 @@ import { Button, Divider, Stack, Typography, useTheme } from '@mui/material'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemText from '@mui/material/ListItemText'
-import { Fragment, useContext, useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import LoginIcon from '@mui/icons-material/Login'
 import { useNavigate } from 'react-router-dom'
 import useRemoveBoard from '../../hooks/useRemoveBoard'
 import { DeleteForever } from '@mui/icons-material'
 import useFirestoreUser, { UserBoardEntity } from '../../hooks/useFirestoreUser'
-import { FirebaseUserContext, FirebaseUserContextType } from '../../providers/firebaseUserProvider'
+import { useUserContext } from '../../providers/firebaseUserProvider'
 import NewBoardForm from './components/newBoardForm/newBoardForm'
 import ShareButton from '../board/components/shareDialog/shareButton'
 
 const Boards = () => {
-  const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
+  const { user } = useUserContext()
   const navigate = useNavigate()
   const theme = useTheme()
   const { getUserData } = useFirestoreUser()

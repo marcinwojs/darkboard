@@ -1,6 +1,5 @@
 import useFirestore from './useFirestore'
-import { useContext } from 'react'
-import { FirebaseUserContext, FirebaseUserContextType } from '../providers/firebaseUserProvider'
+import { useUserContext } from '../providers/firebaseUserProvider'
 import useFirestoreUser from './useFirestoreUser'
 import humanId from 'human-id'
 
@@ -12,7 +11,7 @@ const useCreateBoard = () => {
   const { updateUserData, getUserData } = useFirestoreUser()
   const { addToDoc } = useFirestore()
   const instanceId = humanId()
-  const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
+  const { user } = useUserContext()
 
   const createBoard = ({ boardName }: NewBoardProps) => {
     return new Promise(function (myResolve, myReject) {

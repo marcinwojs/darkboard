@@ -16,7 +16,7 @@ import { debounce } from 'lodash'
 import { Socket } from 'net'
 import { WebsocketContext, WebsocketContextType } from '../../providers/websocketProvider'
 import useBoardRoom from '../../hooks/useBoardRoom'
-import { FirebaseUserContext, FirebaseUserContextType } from '../../providers/firebaseUserProvider'
+import { FirebaseUserContextType, useUserContext } from '../../providers/firebaseUserProvider'
 import { rdb } from '../../config/firebase'
 import ShareButton from './components/shareDialog/shareButton'
 
@@ -109,7 +109,10 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
       <Excalidraw
         autoFocus
         ref={(api) => excalidrawRefCallback(api as ExcalidrawImperativeAPI)}
-        initialData={{ elements, appState }}
+        initialData={{
+          elements,
+          appState,
+        }}
         onChange={(elements) => {
           debounce(() => {
             onChange(elements)
@@ -128,7 +131,7 @@ const LoadBoard = () => {
   const instanceId = useParams()?.boardId as TLInstanceId
   const [elements, setElements] = useState<ExcalidrawInitialDataState['elements'] | null>(null)
   const { getSingleCollectionItem } = useFirestore()
-  const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
+  const { user } = useUserContext()
 
   useEffect(() => {
     if (user) {

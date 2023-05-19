@@ -4,8 +4,8 @@ import GoogleIcon from '@mui/icons-material/Google'
 import LoginForm from './components/loginForm'
 import { signInWithGoogle } from '../../config/firebase'
 import { useNavigate } from 'react-router-dom'
-import { useContext, useEffect } from 'react'
-import { FirebaseUserContext, FirebaseUserContextType } from '../../providers/firebaseUserProvider'
+import { useEffect } from 'react'
+import { useUserContext } from '../../providers/firebaseUserProvider'
 import useFirestoreUser from '../../hooks/useFirestoreUser'
 
 const StyledContent = styled('div')(({ theme }) => ({
@@ -21,7 +21,7 @@ const StyledContent = styled('div')(({ theme }) => ({
 const LoginPage = (): JSX.Element => {
   const { addUser, getUserData } = useFirestoreUser()
   const navigate = useNavigate()
-  const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
+  const { user } = useUserContext()
 
   useEffect(() => {
     if (user) {

@@ -2,8 +2,8 @@ import { styled } from '@mui/material/styles'
 import { Container, Typography, Divider, Stack, Button } from '@mui/material'
 import UserList, { UserEntity } from './components/userList'
 import useFirestore from '../../hooks/useFirestore'
-import { useContext, useEffect, useState } from 'react'
-import { FirebaseUserContext, FirebaseUserContextType } from '../../providers/firebaseUserProvider'
+import { useEffect, useState } from 'react'
+import { useUserContext } from '../../providers/firebaseUserProvider'
 import useAuthorization from '../../hooks/useAuthorization'
 import { useNavigate } from 'react-router-dom'
 import Avatar from '@mui/material/Avatar'
@@ -20,7 +20,7 @@ const StyledContent = styled('div')(({ theme }) => ({
 
 const HomePage = (): JSX.Element => {
   const navigate = useNavigate()
-  const { user } = useContext(FirebaseUserContext) as FirebaseUserContextType
+  const { user } = useUserContext()
   const { getCollection } = useFirestore()
   const { logout } = useAuthorization()
   const [users, setUsers] = useState<UserEntity[]>([])

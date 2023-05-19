@@ -8,6 +8,7 @@ import {
   FormControlLabel,
   Stack,
   TextField,
+  Typography,
 } from '@mui/material'
 import { FormEvent, useState } from 'react'
 import useCreateBoard from '../../../../hooks/useCreateBoard'
@@ -44,8 +45,8 @@ const NewBoardForm = ({ onSuccess }: Props) => {
 
   return (
     <div>
-      <Button variant='outlined' onClick={handleClickOpen}>
-        New Board
+      <Button variant='contained' onClick={handleClickOpen}>
+        <Typography variant={'h6'}>New Board</Typography>
       </Button>
       <Dialog open={open} onClose={handleClose}>
         <form onSubmit={onSubmit}>
@@ -65,10 +66,10 @@ const NewBoardForm = ({ onSuccess }: Props) => {
             </Stack>
           </DialogContent>
           <DialogActions>
-            <Button variant={'outlined'} onClick={handleClose}>
+            <Button variant={'contained'} onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant={'outlined'} type={'submit'} autoFocus>
+            <Button variant={'contained'} type={'submit'} autoFocus>
               Submit
             </Button>
           </DialogActions>
