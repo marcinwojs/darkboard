@@ -9,6 +9,7 @@ import Router from './routes'
 import FirebaseUserProvider from './providers/firebaseUserProvider'
 import '@tldraw/tldraw/editor.css'
 import '@tldraw/tldraw/ui.css'
+import LayoutWrapper from './layout/layoutWrapper'
 
 function App() {
   return (
@@ -20,7 +21,9 @@ function App() {
             fallback={(error) => <ErrorFallback error={error} />}
             onError={(error) => console.error(error)}
           >
-            <Router />
+            <LayoutWrapper>
+              <Router />
+            </LayoutWrapper>
           </ErrorBoundary>
         </FirebaseUserProvider>
       </ThemeProvider>

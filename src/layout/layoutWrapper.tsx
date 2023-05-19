@@ -1,4 +1,4 @@
-import { Button, Container, Link, Stack, Typography, useTheme } from '@mui/material'
+import { Box, Button, Container, Link, Stack, Typography, useTheme } from '@mui/material'
 import useAuthorization from '../hooks/useAuthorization'
 import { useNavigate } from 'react-router-dom'
 import { ReactNode } from 'react'
@@ -21,38 +21,53 @@ const LayoutWrapper = ({ children }: Props) => {
   }
 
   return (
-    <Stack height={'100vh'} width={'100vw'}>
-      <Stack direction={'row'} alignItems={'center'} px={2}>
-        <Link href={'/'} variant={'h3'} color={theme.palette.primary.dark} underline={'none'}>
-          Darkboard
+    <Box height={'100vh'} width={'100vw'}>
+      <Stack
+        direction={'row'}
+        bgcolor={theme.palette.secondary.dark}
+        alignItems={'center'}
+        px={2}
+        height={'60px'}
+      >
+        <Link href={'/'} sx={{ display: 'flex' }}>
+          <img src={'/logo.png'} height={'35px'} alt={'logo'} />
         </Link>
-        <Stack sx={{ mx: 10 }} direction={'row'} spacing={3} p={2}>
-          <Link href={'/login'} variant={'h5'} underline={'none'}>
-            Login
-          </Link>
-          <Link href={'/register'} variant={'h5'} underline={'none'}>
-            Register
-          </Link>
-          <Link href={'/boards'} variant={'h5'} underline={'none'}>
-            Boards
-          </Link>
-          <Link href={'/users'} variant={'h5'} underline={'none'}>
-            user
-          </Link>
-        </Stack>
         {user ? (
-          <Stack sx={{ marginLeft: 'auto' }} direction={'row'} spacing={2}>
-            <Stack direction={'row'} alignItems={'center'}>
-              <Avatar alt={user?.firstName} src={user?.photo}>
-                {user?.photo ? null : user?.firstName[0] || null}
-              </Avatar>
-              <Typography variant={'h5'} color={theme.palette.primary.main} px={1}>
-                {user?.firstName}
-              </Typography>
-            </Stack>
-            <Button onClick={onLogout}>LOGOUT</Button>
+          <Stack direction={'row'} spacing={3} p={2}>
+            <Link href={'/boards'} variant={'h5'} underline={'none'}>
+              Boards
+            </Link>
+            <Link href={'/users'} variant={'h5'} underline={'none'}>
+              user
+            </Link>
           </Stack>
         ) : null}
+        <Stack sx={{ marginLeft: 'auto' }} direction={'row'} spacing={2}>
+          {user ? (
+            <>
+              <Stack direction={'row'} alignItems={'center'}>
+                <Avatar alt={user?.firstName} src={user?.photo}>
+                  {user?.photo ? null : user?.firstName[0] || null}
+                </Avatar>
+                <Typography variant={'h5'} color={theme.palette.primary.main} px={1}>
+                  {user?.firstName}
+                </Typography>
+                <Button onClick={onLogout}>
+                  <Typography variant={'h6'}>Logout</Typography>
+                </Button>
+              </Stack>
+            </>
+          ) : (
+            <>
+              <Link href={'/login'} variant={'h5'} underline={'none'}>
+                Login
+              </Link>
+              <Link href={'/register'} variant={'h5'} underline={'none'}>
+                Register
+              </Link>
+            </>
+          )}
+        </Stack>
       </Stack>
       <Container
         maxWidth={false}
@@ -61,7 +76,7 @@ const LayoutWrapper = ({ children }: Props) => {
       >
         {children}
       </Container>
-    </Stack>
+    </Box>
   )
 }
 

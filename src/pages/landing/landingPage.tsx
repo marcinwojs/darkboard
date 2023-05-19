@@ -42,8 +42,8 @@ const LandingPage = () => {
   const theme = useTheme()
 
   return (
-    <Grid container spacing={2} height={'100%'}>
-      <Grid item xs={12} md={6} alignSelf={'center'} pb={30}>
+    <Stack justifyContent={'center'} direction={'row'} height={'100%'} >
+      <Box width={'50%'} mt={10}>
         <Typography variant={'h2'} color={theme.palette.primary.main} px={5}>
           Darkboard
         </Typography>
@@ -53,16 +53,16 @@ const LandingPage = () => {
           and versatile tools, Darkboard enables users to unleash their creativity, collaborate in
           real-time, and bring their ideas to life effortlessly.
         </Typography>
-      </Grid>
-      <Grid item xs={12} md={6} alignSelf={'center'}>
+      </Box>
+      <Box width={'50%'} mt={10}>
         <Stack spacing={2}>
           <Typography variant={'h4'} color={theme.palette.primary.main}>
             Create new Board
           </Typography>
           <BoardPreview theme={theme} />
         </Stack>
-      </Grid>
-    </Grid>
+      </Box>
+    </Stack>
   )
 }
 

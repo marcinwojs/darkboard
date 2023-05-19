@@ -37,7 +37,6 @@ const HomePage = (): JSX.Element => {
     })
   }
 
-  console.log(user)
   return (
     <Container maxWidth='sm'>
       <StyledContent>

@@ -1,5 +1,14 @@
 import { styled } from '@mui/material/styles'
-import { Link, Container, Typography, Divider, Stack, Button } from '@mui/material'
+import {
+  Link,
+  Card,
+  Typography,
+  Divider,
+  Stack,
+  Button,
+  CardHeader,
+  CardContent,
+} from '@mui/material'
 import GoogleIcon from '@mui/icons-material/Google'
 import LoginForm from './components/loginForm'
 import { signInWithGoogle } from '../../config/firebase'
@@ -45,34 +54,43 @@ const LoginPage = (): JSX.Element => {
   }
 
   return (
-    <Container maxWidth='sm'>
-      <StyledContent>
-        <Typography variant='h4' gutterBottom>
-          Sign in with firebase auth
-        </Typography>
+    <Stack alignItems={'center'} justifyContent={'center'}>
+      <Card sx={{ p: 2, mt: 10 }}>
+        <CardHeader
+          title='Sign in with firebase auth'
+          subheader={
+            <Typography variant='subtitle2' sx={{ pt: 2 }}>
+              Don’t have an account?
+              <Link variant='subtitle2' href={'/register'} mx={1}>
+                Get started
+              </Link>
+            </Typography>
+          }
+        />
 
-        <Typography variant='body2' sx={{ mb: 5 }}>
-          Don’t have an account?
-          <Link variant='subtitle2' href={'/register'} mx={1}>
-            Get started
-          </Link>
-        </Typography>
+        <CardContent>
+          <Stack direction='row' spacing={2}>
+            <Button
+              fullWidth
+              size='large'
+              color='inherit'
+              variant='outlined'
+              onClick={onSignGoogle}
+            >
+              <GoogleIcon />
+            </Button>
+          </Stack>
 
-        <Stack direction='row' spacing={2}>
-          <Button fullWidth size='large' color='inherit' variant='outlined' onClick={onSignGoogle}>
-            <GoogleIcon />
-          </Button>
-        </Stack>
+          <Divider sx={{ my: 3 }}>
+            <Typography variant='body2' sx={{ color: 'text.secondary' }}>
+              OR
+            </Typography>
+          </Divider>
 
-        <Divider sx={{ my: 3 }}>
-          <Typography variant='body2' sx={{ color: 'text.secondary' }}>
-            OR
-          </Typography>
-        </Divider>
-
-        <LoginForm />
-      </StyledContent>
-    </Container>
+          <LoginForm />
+        </CardContent>
+      </Card>
+    </Stack>
   )
 }
 
