@@ -15,7 +15,7 @@ const useRemoveBoard = () => {
           getUserData(userId)
             .then((userData) => {
               updateUserData(userData.id, {
-                userBoards: userData.userBoards.filter((board) => board.id !== id),
+                userBoards: userData.userBoards.filter((boardId) => boardId !== id),
               })
             })
             .catch((reason) => myReject(reason))

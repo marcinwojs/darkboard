@@ -2,9 +2,13 @@ import useFirestore from './useFirestore'
 import { useUserContext } from '../providers/firebaseUserProvider'
 import useFirestoreUser from './useFirestoreUser'
 import humanId from 'human-id'
+import { BoardEntity } from '../pages/boards/components/boardTable/boardTable'
+import { convertFromDateObject } from '../shared/utils'
 
 type NewBoardProps = {
   boardName: string
+  description: string
+  privateBoard: boolean
 }
 
 const useCreateBoard = () => {
@@ -13,12 +17,15 @@ const useCreateBoard = () => {
   const instanceId = humanId()
   const { user } = useUserContext()
 
-  const createBoard = ({ boardName }: NewBoardProps) => {
+  const createBoard = ({ boardName, description, privateBoard }: NewBoardProps) => {
     return new Promise(function (myResolve, myReject) {
-      const data = {
-        boardName: boardName,
+      const data: BoardEntity = {
         boardId: instanceId,
-        creatorId: user?.id,
+        creatorId: user?.id || '',
+        boardName,
+        description,
+        privateBoard,
+        lastEdit: convertFromDateObject(new Date()),
         users: [{ name: user?.firstName || '', id: user?.id || '', creator: true }],
       }
 
@@ -33,7 +40,7 @@ const useCreateBoard = () => {
               getUserData(user?.id || '')
                 .then((data) => {
                   const newUserData = data
-                  newUserData.userBoards.push({ id: instanceId, name: boardName, own: true })
+                  newUserData.userBoards.push(instanceId)
                   updateUserData(user?.id || '', newUserData)
                     .then(() => {
                       myResolve(instanceId)

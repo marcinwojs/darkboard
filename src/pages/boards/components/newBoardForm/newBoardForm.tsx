@@ -18,7 +18,9 @@ type Props = {
 }
 
 const initialFormState = {
-  name: '',
+  boardName: '',
+  description: '',
+  privateBoard: false,
 }
 
 const NewBoardForm = ({ onSuccess }: Props) => {
@@ -31,7 +33,7 @@ const NewBoardForm = ({ onSuccess }: Props) => {
   const handleClose = () => setOpen(false)
 
   const onCreateBoard = () => {
-    createBoard({ boardName: formState.name }).then(() => {
+    createBoard(formState).then(() => {
       onSuccess && onSuccess()
       setFormState(initialFormState)
       setOpen(false)
@@ -45,22 +47,39 @@ const NewBoardForm = ({ onSuccess }: Props) => {
 
   return (
     <div>
-      <Button variant='contained' onClick={handleClickOpen}>
-        <Typography variant={'h6'}>New Board</Typography>
+      <Button variant='contained' onClick={handleClickOpen} size={'small'}>
+        <Typography>New Board</Typography>
       </Button>
       <Dialog open={open} onClose={handleClose}>
         <form onSubmit={onSubmit}>
           <DialogTitle id='alert-dialog-title'>New Board Form</DialogTitle>
-          <DialogContent>
+          <DialogContent sx={{ minWidth: '400px' }}>
             <Stack py={2} spacing={2} justifyContent={'start'}>
               <TextField
                 required
                 label='Board name'
-                value={formState.name}
-                onChange={(event) => setFormState({ ...formState, name: event.target.value })}
+                value={formState.boardName}
+                onChange={(event) => setFormState({ ...formState, boardName: event.target.value })}
+              />
+              <TextField
+                label='Description'
+                multiline
+                minRows={2}
+                value={formState.description}
+                onChange={(event) =>
+                  setFormState({ ...formState, description: event.target.value })
+                }
               />
               <FormControlLabel
-                control={<Checkbox sx={{ paddingLeft: 0 }} />}
+                control={
+                  <Checkbox
+                    checked={formState.privateBoard}
+                    sx={{ paddingLeft: 0 }}
+                    onChange={(event) =>
+                      setFormState({ ...formState, privateBoard: event.target.checked })
+                    }
+                  />
+                }
                 label='Private Room'
               />
             </Stack>

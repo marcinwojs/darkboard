@@ -4,7 +4,7 @@ import RegisterPage from './pages/register/registerPage'
 import LoginPage from './pages/login/loginPage'
 import HomePage from './pages/home/homePage'
 import Board from './pages/board/board'
-import Boards from './pages/boards/boards'
+import BoardsPage from './pages/boards/boardsPage'
 import WebsocketProvider from './providers/websocketProvider'
 import LandingPage from './pages/landing/landingPage'
 import ProtectedRoutes from './components/protectedRoutes/protectedRoutes'
@@ -49,7 +49,7 @@ export default function Router() {
       path: '/boards',
       element: (
         <ProtectedRoutes>
-          <Boards />
+          <BoardsPage />
         </ProtectedRoutes>
       ),
     },

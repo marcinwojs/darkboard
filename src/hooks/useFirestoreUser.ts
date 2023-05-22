@@ -2,13 +2,11 @@ import useFirestore from './useFirestore'
 import { doc, updateDoc } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
-export type UserBoardEntity = { id: string; name: string; own: boolean }
-
 export type UserEntity = {
   email: string
   firstName: string
   id: string
-  userBoards: UserBoardEntity[]
+  userBoards: string[]
 }
 
 const useFirestoreUser = () => {
