@@ -31,13 +31,12 @@ function startServer() {
     socket.on('join-room', (roomID) => {
       try {
         socket.join(roomID)
-        socket.in(roomID).emit('users:update')
       } catch (e) {
         console.log('join error')
       }
     })
 
-    socket.on('server-change', (elements, roomId) => {
+    socket.on('server-change', (elements, roomId, userId) => {
       socket.in(roomId).emit('client-change', elements)
     })
   })
