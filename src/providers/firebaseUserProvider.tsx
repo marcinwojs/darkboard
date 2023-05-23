@@ -1,4 +1,4 @@
-import {createContext, FC, ReactNode, useContext, useEffect, useState} from 'react'
+import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react'
 import { UserEntity } from '../pages/home/components/userList'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../config/firebase'
@@ -11,6 +11,7 @@ export type FirebaseUserContextType = {
 }
 
 export const FirebaseUserContext = createContext<FirebaseUserContextType>({
+  loaded: false,
   user: null,
   setUser: () => null,
 })
@@ -24,25 +25,24 @@ const FirebaseUserProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   useEffect(() => {
     onAuthStateChanged(auth, (userData) => {
-      if (userData) {
-        if (userData?.providerData[0].providerId === 'password') {
-          return getSingleCollectionItem({ collectionId: 'users', id: userData.uid }).then(
-            (data) => {
-              if (data) setUser(data as UserEntity)
-              setLoaded(true)
-            },
-          )
-        }
-        setUser({
-          firstName: userData.displayName || '',
-          email: userData.email || '',
-          photo: userData.photoURL || undefined,
-          id: userData.uid,
-        })
-      } else {
+      if (!userData) {
         setUser(null)
-        console.log('user is logged out')
+        setLoaded(true)
+        return
       }
+      if (userData?.providerData[0].providerId === 'password') {
+        getSingleCollectionItem({ collectionId: 'users', id: userData.uid }).then((data) => {
+          if (data) setUser(data as UserEntity)
+          setLoaded(true)
+        })
+        return
+      }
+      setUser({
+        firstName: userData.displayName || '',
+        email: userData.email || '',
+        photo: userData.photoURL || undefined,
+        id: userData.uid,
+      })
       setLoaded(true)
     })
   }, [])

@@ -34,7 +34,7 @@ type Props = ExcalidrawInitialDataState & {
 export function Board({ elements, appState, user, socket, instanceId }: Props) {
   const { updateDocField } = useFirestore()
   const [excalidrawAPI, excalidrawRefCallback] = useCallbackRefState<ExcalidrawImperativeAPI>()
-  const oldElementsMap = new Map(elements?.map((e) => [e.id, e]))
+  const oldElementsMap = new Map(elements?.map((e) => [e.id, e.version]))
 
   useEffect(() => {
     if (excalidrawAPI && socket) {
@@ -45,10 +45,10 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
         const diffs: ExcalidrawElement[] = []
 
         elements.forEach((element: ExcalidrawElement) => {
-          if (oldElementsMap.get(element.id)?.version !== element.version) {
+          if (oldElementsMap.get(element.id) !== element.version) {
             diffs.push(element)
             newMap.set(element.id, { ...element })
-            oldElementsMap.set(element.id, { ...element })
+            oldElementsMap.set(element.id, element.version)
           }
         })
 
@@ -72,9 +72,9 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
     const diffs: ExcalidrawElement[] = []
 
     elements.forEach((element: ExcalidrawElement) => {
-      if (oldElementsMap.get(element.id)?.version !== element.version) {
+      if (oldElementsMap.get(element.id) !== element.version) {
         diffs.push(element)
-        oldElementsMap.set(element.id, { ...element })
+        oldElementsMap.set(element.id, element.version)
       }
     })
 
