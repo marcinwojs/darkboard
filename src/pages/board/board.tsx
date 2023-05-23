@@ -3,9 +3,9 @@ import '@tldraw/tldraw/editor.css'
 import '@tldraw/tldraw/ui.css'
 import { useEffect, useState, useCallback, useContext } from 'react'
 import useFirestore from '../../hooks/useFirestore'
-import { Box, LinearProgress, Stack, Typography } from '@mui/material'
+import {Box, LinearProgress, Stack, Typography, useTheme} from '@mui/material'
 import { useParams } from 'react-router-dom'
-import { Excalidraw } from '@excalidraw/excalidraw'
+import { Excalidraw, MainMenu } from '@excalidraw/excalidraw'
 import { ref, onValue, update, onDisconnect } from 'firebase/database'
 import {
   ExcalidrawImperativeAPI,
@@ -32,6 +32,8 @@ type Props = ExcalidrawInitialDataState & {
 }
 
 export function Board({ elements, appState, user, socket, instanceId }: Props) {
+  const theme = useTheme();
+
   const { updateDocField } = useFirestore()
   const [excalidrawAPI, excalidrawRefCallback] = useCallbackRefState<ExcalidrawImperativeAPI>()
   const oldElementsMap = new Map(elements?.map((e) => [e.id, e.version]))
@@ -118,6 +120,7 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
   return (
     <Box width={'100%'} height={'100%'}>
       <Excalidraw
+        theme={theme.palette.mode}
         autoFocus
         ref={(api) => excalidrawRefCallback(api as ExcalidrawImperativeAPI)}
         initialData={{
@@ -129,7 +132,16 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
         }}
         onPointerUpdate={(payload) => onPointerChange(payload)}
         renderTopRightUI={() => <ShareButton id={instanceId} />}
-      />
+      >
+        <MainMenu>
+          <MainMenu.DefaultItems.SaveToActiveFile />
+          <MainMenu.DefaultItems.SaveAsImage />
+          <MainMenu.DefaultItems.Help />
+          <MainMenu.DefaultItems.ClearCanvas />
+          <MainMenu.Separator />
+          <MainMenu.DefaultItems.ChangeCanvasBackground />
+        </MainMenu>
+      </Excalidraw>
     </Box>
   )
 }
