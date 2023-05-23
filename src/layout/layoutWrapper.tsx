@@ -33,38 +33,27 @@ const LayoutWrapper = ({ children }: Props) => {
           <img src={'/logo.png'} height={'35px'} alt={'logo'} />
         </Link>
         {user ? (
-          <Stack direction={'row'} spacing={3} p={2}>
-            <Link href={'/boards'} variant={'h5'} underline={'none'}>
-              Boards
-            </Link>
-            <Link href={'/users'} variant={'h5'} underline={'none'}>
-              user
-            </Link>
-          </Stack>
+          <Button onClick={() => navigate('/boards')}>
+            <Typography fontWeight={'bold'}>Boards</Typography>
+          </Button>
         ) : null}
         <Stack sx={{ marginLeft: 'auto' }} direction={'row'} spacing={2}>
           {user ? (
-            <>
-              <Stack direction={'row'} alignItems={'center'}>
-                <Avatar alt={user?.firstName} src={user?.photo}>
-                  {user?.photo ? null : user?.firstName[0] || null}
-                </Avatar>
-                <Typography variant={'h5'} color={theme.palette.primary.main} px={1}>
-                  {user?.firstName}
-                </Typography>
-                <Button onClick={onLogout}>
-                  <Typography variant={'h6'}>Logout</Typography>
-                </Button>
-              </Stack>
-            </>
+            <Stack direction={'row'} alignItems={'center'}>
+              <Avatar alt={user?.firstName} src={user?.photo}>
+                {user?.photo ? null : user?.firstName[0] || null}
+              </Avatar>
+              <Typography fontWeight={'bold'} color={theme.palette.primary.main} px={1}>
+                {user?.firstName}
+              </Typography>
+              <Button onClick={onLogout}>
+                <Typography fontWeight={'bold'}>Logout</Typography>
+              </Button>
+            </Stack>
           ) : (
             <>
-              <Link href={'/login'} variant={'h5'} underline={'none'}>
-                Login
-              </Link>
-              <Link href={'/register'} variant={'h5'} underline={'none'}>
-                Register
-              </Link>
+              <Button onClick={() => navigate('/login')}>Login</Button>
+              <Button onClick={() => navigate('/register')}>Register</Button>
             </>
           )}
         </Stack>

@@ -6,6 +6,7 @@ import useFirestore from '../hooks/useFirestore'
 
 export type FirebaseUserContextType = {
   user: UserEntity | null
+  loaded: boolean
   setUser: (data: UserEntity | null) => void
 }
 
@@ -18,6 +19,7 @@ export const useUserContext = () => useContext<FirebaseUserContextType>(Firebase
 
 const FirebaseUserProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserEntity | null>(null)
+  const [loaded, setLoaded] = useState(false)
   const { getSingleCollectionItem } = useFirestore()
 
   useEffect(() => {
@@ -27,6 +29,7 @@ const FirebaseUserProvider: FC<{ children: ReactNode }> = ({ children }) => {
           return getSingleCollectionItem({ collectionId: 'users', id: userData.uid }).then(
             (data) => {
               if (data) setUser(data as UserEntity)
+              setLoaded(true)
             },
           )
         }
@@ -40,11 +43,12 @@ const FirebaseUserProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setUser(null)
         console.log('user is logged out')
       }
+      setLoaded(true)
     })
   }, [])
 
   return (
-    <FirebaseUserContext.Provider value={{ user, setUser }}>
+    <FirebaseUserContext.Provider value={{ user, loaded, setUser }}>
       {children}
     </FirebaseUserContext.Provider>
   )

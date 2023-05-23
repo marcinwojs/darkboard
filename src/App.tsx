@@ -13,21 +13,21 @@ import LayoutWrapper from './layout/layoutWrapper'
 
 function App() {
   return (
-    <BrowserRouter>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <FirebaseUserProvider>
-          <ErrorBoundary
-            fallback={(error) => <ErrorFallback error={error} />}
-            onError={(error) => console.error(error)}
-          >
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <FirebaseUserProvider>
+        <ErrorBoundary
+          fallback={(error) => <ErrorFallback error={error} />}
+          onError={(error) => console.error(error)}
+        >
+          <BrowserRouter>
             <LayoutWrapper>
               <Router />
             </LayoutWrapper>
-          </ErrorBoundary>
-        </FirebaseUserProvider>
-      </ThemeProvider>
-    </BrowserRouter>
+          </BrowserRouter>
+        </ErrorBoundary>
+      </FirebaseUserProvider>
+    </ThemeProvider>
   )
 }
 
