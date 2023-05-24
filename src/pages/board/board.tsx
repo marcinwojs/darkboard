@@ -17,7 +17,7 @@ import { WebsocketContext, WebsocketContextType } from '../../providers/websocke
 import useBoardRoom from '../../hooks/useBoardRoom'
 import { FirebaseUserContextType, useUserContext } from '../../providers/firebaseUserProvider'
 import { rdb } from '../../config/firebase'
-import ShareButton from './components/shareDialog/shareButton'
+import ShareButton from './components/shareButton/shareButton'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)

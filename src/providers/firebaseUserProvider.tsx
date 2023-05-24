@@ -1,8 +1,14 @@
 import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react'
-import { UserEntity } from '../pages/home/components/userList'
 import { onAuthStateChanged } from 'firebase/auth'
 import { auth } from '../config/firebase'
 import useFirestore from '../hooks/useFirestore'
+
+export type UserEntity = {
+  firstName: string
+  id: string
+  email: string
+  photo?: string
+}
 
 export type FirebaseUserContextType = {
   user: UserEntity | null
