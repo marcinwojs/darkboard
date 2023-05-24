@@ -45,7 +45,7 @@ const useCreateBoard = () => {
                     .then(() => {
                       myResolve(instanceId)
                     })
-                    .catch((reason: any) => myReject(reason))
+                    .catch((reason) => myReject(reason))
                 })
                 .catch((reason) => myReject(reason))
             })

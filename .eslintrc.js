@@ -18,16 +18,16 @@ module.exports = {
   },
   plugins: ['react', 'react-hooks', '@typescript-eslint', 'prettier'],
   rules: {
+    'react/jsx-curly-brace-presence': 'off',
     'react/react-in-jsx-scope': 'off',
-    camelcase: 'error',
     'spaced-comment': 'error',
-    quotes: ['error', 'single'],
     'no-duplicate-imports': 'error',
+    camelcase: 'error',
+    quotes: ['error', 'single'],
   },
   settings: {
     'import/resolver': {
       typescript: {},
     },
   },
-  ignorePatterns: ['src/excalidraw-room'],
 }

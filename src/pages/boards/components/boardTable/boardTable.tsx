@@ -13,16 +13,16 @@ import {
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import useRemoveBoard from '../../../../hooks/useRemoveBoard'
-import { UserEntity } from '../../../home/components/userList'
 import LoginIcon from '@mui/icons-material/Login'
 import { DeleteForever } from '@mui/icons-material'
-import ShareButton from '../../../board/components/shareDialog/shareButton'
+import ShareButton from '../../../board/components/shareButton/shareButton'
 import AvatarGroup from '../../../../shared/components/avatar/avatarGroup'
 import NewBoardForm from '../newBoardForm/newBoardForm'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import moment from 'moment'
 import { convertToObjectDate } from '../../../../shared/utils'
 import { styled } from '@mui/material/styles'
+import { UserEntity } from '../../../../providers/firebaseUserProvider'
 
 const CenteredCell = styled(TableCell)(() => ({
   textAlign: 'center',

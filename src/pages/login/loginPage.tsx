@@ -1,4 +1,3 @@
-import { styled } from '@mui/material/styles'
 import {
   Link,
   Card,
@@ -16,16 +15,6 @@ import { useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useUserContext } from '../../providers/firebaseUserProvider'
 import useFirestoreUser from '../../hooks/useFirestoreUser'
-
-const StyledContent = styled('div')(({ theme }) => ({
-  maxWidth: 480,
-  margin: 'auto',
-  minHeight: '100vh',
-  display: 'flex',
-  justifyContent: 'center',
-  flexDirection: 'column',
-  padding: theme.spacing(12, 0),
-}))
 
 const LoginPage = (): JSX.Element => {
   const { addUser, getUserData } = useFirestoreUser()

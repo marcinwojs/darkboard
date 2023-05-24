@@ -1,4 +1,4 @@
-import { Stack, Typography, Grid, useTheme, Box, Theme } from '@mui/material'
+import { Stack, Typography, useTheme, Box, Theme } from '@mui/material'
 import GestureIcon from '@mui/icons-material/Gesture'
 
 const BoardPreview = ({ theme }: { theme: Theme }) => {

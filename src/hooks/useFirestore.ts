@@ -1,13 +1,4 @@
-import {
-  collection,
-  setDoc,
-  getDocs,
-  doc,
-  getDoc,
-  deleteDoc,
-  onSnapshot,
-  updateDoc,
-} from 'firebase/firestore'
+import { collection, setDoc, getDocs, doc, getDoc, deleteDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
 type RemoveFromDoc = {
@@ -16,7 +7,7 @@ type RemoveFromDoc = {
 }
 
 type AddToDoc = RemoveFromDoc & {
-  data: { [key: string]: any }
+  data: { [key: string]: Partial<unknown> }
 }
 
 type GetCollection = {
@@ -37,7 +28,7 @@ const UseFirestore = () => {
 
   const getCollection = ({ collectionId }: GetCollection) => {
     return getDocs(collection(db, collectionId)).then((docRefs) => {
-      const res: any[] = []
+      const res: unknown[] = []
 
       docRefs.forEach((item) => {
         res.push({
