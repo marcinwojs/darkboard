@@ -9,7 +9,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  useTheme,
 } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 import useRemoveBoard from '../../../../hooks/useRemoveBoard'
@@ -18,7 +17,7 @@ import { DeleteForever } from '@mui/icons-material'
 import ShareButton from '../../../board/components/shareButton/shareButton'
 import AvatarGroup from '../../../../shared/components/avatar/avatarGroup'
 import NewBoardForm from '../newBoardForm/newBoardForm'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import { CheckCircle, Unpublished } from '@mui/icons-material/'
 import moment from 'moment'
 import { convertToObjectDate } from '../../../../shared/utils'
 import { styled } from '@mui/material/styles'
@@ -51,7 +50,6 @@ type Props = {
 }
 
 const BoardTable = ({ boards, user, onUpdate }: Props) => {
-  const theme = useTheme()
   const navigate = useNavigate()
   const { removeBoard } = useRemoveBoard()
 
@@ -87,11 +85,7 @@ const BoardTable = ({ boards, user, onUpdate }: Props) => {
                 <TableRow key={boardId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                   <CenteredCell>{boardName}</CenteredCell>
                   <CenteredCell>{description}</CenteredCell>
-                  <CenteredCell>
-                    <CheckCircleIcon
-                      sx={{ color: privateBoard ? theme.palette.primary.main : 'grey' }}
-                    />
-                  </CenteredCell>
+                  <CenteredCell>{privateBoard ? <CheckCircle /> : <Unpublished />}</CenteredCell>
                   <CenteredCell>{moment(convertToObjectDate(lastEdit)).fromNow()}</CenteredCell>
                   <CenteredCell>
                     <AvatarGroup users={users} />
