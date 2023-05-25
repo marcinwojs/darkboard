@@ -5,3 +5,4 @@ const convertToObjectDate = (timeObject: { seconds: number; nanoseconds: number 
   new Timestamp(timeObject.seconds, timeObject.nanoseconds).toDate()
 
 export { convertToObjectDate, convertFromDateObject }
+
