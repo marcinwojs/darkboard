@@ -18,6 +18,7 @@ import useBoardRoom from '../../hooks/useBoardRoom'
 import { UserEntity, useUserContext } from '../../providers/firebaseUserProvider'
 import { rdb } from '../../config/firebase'
 import ShareButton from './components/shareButton/shareButton'
+import { serializeExcToFbase } from '../../shared/utils'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)
@@ -47,7 +48,9 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
         const data = snapshot.val() || {}
         delete data[user?.id]
 
-        excalidrawAPI?.updateScene({ collaborators: new Map(Object.entries(data)) })
+        excalidrawAPI?.updateScene({
+          collaborators: new Map(Object.entries(data)),
+        })
         onDisconnect(ref(rdb, `pointer-update/${instanceId}/${user.id}`)).remove()
       })
 
@@ -85,24 +88,7 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
     })
 
     if (diffs.length > 0) {
-      const serializedElements = [...elements].map((element: ExcalidrawElement) => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        const points = element?.points
-        const elementWithoutUndefined = Object.keys(element).reduce((acc, key) => {
-          const _acc = acc
-          if (element[key as keyof ExcalidrawElement] !== undefined)
-            _acc[key] = element[key as keyof ExcalidrawElement]
-          return _acc
-        }, {} as Record<string, unknown>)
-
-        if (points) {
-          return {
-            ...elementWithoutUndefined,
-            points: JSON.stringify(points),
-          }
-        } else return elementWithoutUndefined
-      })
+      const serializedElements = serializeExcToFbase(elements)
 
       updateDocField({
         collectionId: 'boardsContent',
