@@ -1,66 +1,18 @@
-import { Box, Button, Container, Link, Stack, Typography, useTheme } from '@mui/material'
-import useAuthorization from '../hooks/useAuthorization'
-import { useNavigate } from 'react-router-dom'
+import { Box, Container } from '@mui/material'
 import { ReactNode } from 'react'
-import { useUserContext } from '../providers/firebaseUserProvider'
-import Avatar from '@mui/material/Avatar'
+import Header from './header'
 
 type Props = {
   children: ReactNode
 }
 
 const LayoutWrapper = ({ children }: Props) => {
-  const { user } = useUserContext()
-  const theme = useTheme()
-  const { logout } = useAuthorization()
-  const navigate = useNavigate()
-  const onLogout = () => {
-    logout().then(() => {
-      navigate('/', { replace: true })
-    })
-  }
-
   return (
-    <Box height={'100vh'} width={'100vw'}>
-      <Stack
-        direction={'row'}
-        bgcolor={theme.palette.secondary.dark}
-        alignItems={'center'}
-        px={2}
-        height={'60px'}
-      >
-        <Link href={'/'} sx={{ display: 'flex' }}>
-          <img src={'/logo.png'} height={'35px'} alt={'logo'} />
-        </Link>
-        {user ? (
-          <Button onClick={() => navigate('/boards')}>
-            <Typography fontWeight={'bold'}>Boards</Typography>
-          </Button>
-        ) : null}
-        <Stack sx={{ marginLeft: 'auto' }} direction={'row'} spacing={2}>
-          {user ? (
-            <Stack direction={'row'} alignItems={'center'}>
-              <Avatar alt={user?.firstName} src={user?.photo}>
-                {user?.photo ? null : user?.firstName[0] || null}
-              </Avatar>
-              <Typography fontWeight={'bold'} color={theme.palette.primary.main} px={1}>
-                {user?.firstName}
-              </Typography>
-              <Button onClick={onLogout}>
-                <Typography fontWeight={'bold'}>Logout</Typography>
-              </Button>
-            </Stack>
-          ) : (
-            <>
-              <Button onClick={() => navigate('/login')}>Login</Button>
-              <Button onClick={() => navigate('/register')}>Register</Button>
-            </>
-          )}
-        </Stack>
-      </Stack>
+    <Box >
+      <Header/>
       <Container
         maxWidth={false}
-        sx={{ height: 'inherit', bgcolor: theme.palette.grey['400'] }}
+        sx={{ height: 'inherit'}}
         disableGutters
       >
         {children}

@@ -118,7 +118,7 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
   }
 
   return (
-    <Box width={'100%'} height={'100%'}>
+    <Box width={'100%'} height={'100vh'}>
       <Excalidraw
         theme={theme.palette.mode}
         autoFocus
