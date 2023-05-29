@@ -17,6 +17,7 @@ import { MouseEvent, useState } from 'react'
 import { useUserContext } from '../providers/firebaseUserProvider'
 import Avatar from '@mui/material/Avatar'
 import Logo from './logo'
+import DarkModeSwitcher from './darkModeSwitcher'
 
 const Header = () => {
   const { user } = useUserContext()
@@ -118,7 +119,7 @@ const Header = () => {
               </Button>
             ) : null}
           </Box>
-
+          <DarkModeSwitcher />
           <Box sx={{ flexGrow: 0 }}>
             {user ? (
               <>

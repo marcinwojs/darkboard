@@ -44,10 +44,10 @@ const LandingPage = () => {
     <Box sx={{ display: 'flex', justifyContent: 'center' }}>
       <Stack justifyContent={'center'} direction={'row'} height={'100%'} maxWidth='xl'>
         <Box width={'50%'} mt={10}>
-          <Typography variant={'h2'} color={theme.palette.primary.main} px={5}>
+          <Typography variant={'h2'} px={5}>
             Darkboard
           </Typography>
-          <Typography variant={'subtitle1'} color={theme.palette.primary.dark} px={5}>
+          <Typography variant={'subtitle1'} px={5}>
             Darkboard is an innovative application that provides users with a digital whiteboard
             experience in a sleek and visually captivating dark theme. With its intuitive interface
             and versatile tools, Darkboard enables users to unleash their creativity, collaborate in
@@ -56,9 +56,7 @@ const LandingPage = () => {
         </Box>
         <Box width={'50%'} mt={10}>
           <Stack spacing={2}>
-            <Typography variant={'h4'} color={theme.palette.primary.main}>
-              Create new Board
-            </Typography>
+            <Typography variant={'h4'}>Create new Board</Typography>
             <BoardPreview theme={theme} />
           </Stack>
         </Box>
