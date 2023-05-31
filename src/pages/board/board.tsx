@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom'
 import { Excalidraw, MainMenu } from '@excalidraw/excalidraw'
 import { ref, onValue, update, onDisconnect } from 'firebase/database'
 import {
+  BinaryFiles,
   ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState,
 } from '@excalidraw/excalidraw/types/types'
@@ -36,11 +37,13 @@ type Props = ExcalidrawInitialDataState & {
   instanceId: string
 }
 
-export function Board({ elements, appState, user, socket, instanceId }: Props) {
+export function Board({ elements, appState, files, user, socket, instanceId }: Props) {
   const theme = useTheme()
   const { updateDocField } = useFirestore()
   const [excalidrawAPI, excalidrawRefCallback] = useCallbackRefState<ExcalidrawImperativeAPI>()
   const oldElementsMap = new Map(elements?.map((e) => [e.id, e.version]))
+  const oldFilesSet = new Set(Object.keys(files || {}))
+  console.log(oldFilesSet)
 
   useEffect(() => {
     if (excalidrawAPI && socket) {
@@ -77,7 +80,7 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
     }
   }, [excalidrawAPI])
 
-  const onChange = (elements: readonly ExcalidrawElement[]) => {
+  const onChange = (elements: readonly ExcalidrawElement[], files: BinaryFiles) => {
     const diffs: ExcalidrawElement[] = []
 
     elements.forEach((element: ExcalidrawElement) => {
@@ -123,8 +126,12 @@ export function Board({ elements, appState, user, socket, instanceId }: Props) {
         theme={theme.palette.mode}
         autoFocus
         ref={(api) => excalidrawRefCallback(api as ExcalidrawImperativeAPI)}
-        initialData={{ elements, appState }}
-        onChange={(elements) => onChange(elements)}
+        initialData={{
+          elements,
+          appState,
+          files,
+        }}
+        onChange={(elements, appState, files) => onChange(elements, files)}
         onPointerUpdate={onPointerChange}
         renderTopRightUI={() => <ShareButton id={instanceId} />}
       >
@@ -146,6 +153,7 @@ const LoadBoard = () => {
   const { socket } = useContext(WebsocketContext) as WebsocketContextType
   const instanceId = useParams()?.boardId as TLInstanceId
   const [elements, setElements] = useState<ExcalidrawInitialDataState['elements'] | null>(null)
+  const [files, setFiles] = useState<BinaryFiles | null>(null)
   const { getSingleCollectionItem } = useFirestore()
   const { user } = useUserContext()
 
@@ -171,13 +179,15 @@ const LoadBoard = () => {
       })
 
       setElements(deserializedElements)
+      setFiles(data.files)
     })
   }, [])
 
-  return elements && socket && user ? (
+  return files && elements && socket && user ? (
     <Board
       instanceId={instanceId}
       elements={elements}
+      files={files}
       socket={socket as unknown as Socket}
       user={user}
     />
