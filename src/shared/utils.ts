@@ -1,5 +1,6 @@
 import { Timestamp } from 'firebase/firestore'
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
+import { BinaryFiles } from '@excalidraw/excalidraw/types/types'
 const convertFromDateObject = (date: Date) => Timestamp.fromDate(date)
 
 const convertToObjectDate = (timeObject: { seconds: number; nanoseconds: number }) =>
@@ -16,3 +17,18 @@ export const serializeExcToFbase = (elements: readonly ExcalidrawElement[]) =>
       return acc
     }, {}),
   )
+
+export const filterFiles = (files: BinaryFiles, oldFilesSet: Set<string>) => {
+  const filteredFiles = files
+
+  Object.keys(files).forEach((fileId) => {
+    if (oldFilesSet.has(fileId)) {
+      delete filteredFiles[fileId]
+    }
+  })
+
+  return Object.keys(filteredFiles).reduce<Record<string, unknown>>(
+    (a, c) => ((a[`files.${c}`] = filteredFiles[c]), a),
+    {},
+  )
+}

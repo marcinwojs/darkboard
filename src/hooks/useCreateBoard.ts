@@ -35,7 +35,7 @@ const useCreateBoard = () => {
         id: instanceId,
       })
         .then(() => {
-          addToDoc({ collectionId: 'boardsContent', id: instanceId, data: { elements: [] } })
+          addToDoc({ collectionId: 'boardsContent', id: instanceId, data: { elements: [], files: {} } })
             .then(() => {
               getUserData(user?.id || '')
                 .then((data) => {

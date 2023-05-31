@@ -12,14 +12,17 @@ import {
   ExcalidrawImperativeAPI,
   ExcalidrawInitialDataState,
 } from '@excalidraw/excalidraw/types/types'
-import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
+import {
+  ExcalidrawElement,
+  ExcalidrawImageElement,
+} from '@excalidraw/excalidraw/types/element/types'
 import { Socket } from 'net'
 import { WebsocketContext, WebsocketContextType } from '../../providers/websocketProvider'
 import useBoardRoom from '../../hooks/useBoardRoom'
 import { UserEntity, useUserContext } from '../../providers/firebaseUserProvider'
 import { rdb } from '../../config/firebase'
 import ShareButton from './components/shareButton/shareButton'
-import { serializeExcToFbase } from '../../shared/utils'
+import { filterFiles, serializeExcToFbase } from '../../shared/utils'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)
@@ -39,11 +42,10 @@ type Props = ExcalidrawInitialDataState & {
 
 export function Board({ elements, appState, files, user, socket, instanceId }: Props) {
   const theme = useTheme()
-  const { updateDocField } = useFirestore()
+  const { updateDocField, getSingleCollectionItem } = useFirestore()
   const [excalidrawAPI, excalidrawRefCallback] = useCallbackRefState<ExcalidrawImperativeAPI>()
   const oldElementsMap = new Map(elements?.map((e) => [e.id, e.version]))
   const oldFilesSet = new Set(Object.keys(files || {}))
-  console.log(oldFilesSet)
 
   useEffect(() => {
     if (excalidrawAPI && socket) {
@@ -73,7 +75,26 @@ export function Board({ elements, appState, files, user, socket, instanceId }: P
             }
           })
 
-          if (diffs.length) excalidrawAPI?.updateScene({ elements: Array.from(newMap.values()) })
+          if (diffs.length) {
+            const newFiles: string[] = []
+            const newSet = new Set(Object.keys(excalidrawAPI.getFiles() || {}))
+
+            diffs.forEach((element) => {
+              const imageElement = element as ExcalidrawImageElement
+              if (imageElement.fileId && !newSet.has(imageElement.fileId)) {
+                newFiles.push(imageElement.fileId)
+                oldFilesSet.add(imageElement.fileId)
+              }
+            })
+
+            if (newFiles.length) {
+              getSingleCollectionItem({
+                collectionId: 'boardsContent',
+                id: `${instanceId}`,
+              }).then((data) => excalidrawAPI?.addFiles(Object.values(data.files)))
+            }
+            excalidrawAPI?.updateScene({ elements: Array.from(newMap.values()) })
+          }
         }
         onDisconnect(ref(rdb, `board-update/${instanceId}`)).remove()
       })
@@ -92,10 +113,11 @@ export function Board({ elements, appState, files, user, socket, instanceId }: P
 
     if (diffs.length > 0) {
       const serializedElements = serializeExcToFbase(elements)
+      const filteredFiles = filterFiles(files, oldFilesSet)
 
       updateDocField({
         collectionId: 'boardsContent',
-        data: { elements: serializedElements },
+        data: { elements: serializedElements, ...filteredFiles },
         id: instanceId,
       })
       update(ref(rdb, `board-update/${instanceId}`), { elements: diffs })
