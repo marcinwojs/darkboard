@@ -12,6 +12,7 @@ import {
 } from '@mui/material'
 import { FormEvent, useState } from 'react'
 import useCreateBoard from '../../../../hooks/useCreateBoard'
+import { useNavigate } from 'react-router-dom'
 
 type Props = {
   onSuccess?: () => void
@@ -24,6 +25,7 @@ const initialFormState = {
 }
 
 const NewBoardForm = ({ onSuccess }: Props) => {
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [formState, setFormState] = useState(initialFormState)
   const { createBoard } = useCreateBoard()
@@ -33,10 +35,9 @@ const NewBoardForm = ({ onSuccess }: Props) => {
   const handleClose = () => setOpen(false)
 
   const onCreateBoard = () => {
-    createBoard(formState).then(() => {
+    createBoard(formState).then((id) => {
       onSuccess && onSuccess()
-      setFormState(initialFormState)
-      setOpen(false)
+      navigate(`/board/${id}`)
     })
   }
 

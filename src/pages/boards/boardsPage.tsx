@@ -33,7 +33,7 @@ const BoardsPage = () => {
 
   return (
     <Stack alignItems={'center'} justifyContent={'center'} height={'inherit'}>
-      {user && <BoardTable user={user} boards={boards} onUpdate={console.log} />}
+      {user && <BoardTable user={user} boards={boards} />}
     </Stack>
   )
 }

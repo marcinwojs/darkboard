@@ -46,10 +46,9 @@ export type BoardEntity = {
 type Props = {
   user: UserEntity
   boards: BoardEntity[]
-  onUpdate: () => void
 }
 
-const BoardTable = ({ boards, user, onUpdate }: Props) => {
+const BoardTable = ({ boards, user }: Props) => {
   const navigate = useNavigate()
   const { removeBoard } = useRemoveBoard()
 
@@ -58,7 +57,7 @@ const BoardTable = ({ boards, user, onUpdate }: Props) => {
   }
 
   const onRemoveBoard = (id: string) => {
-    if (user) removeBoard(user?.id, id).then(() => onUpdate())
+    if (user) removeBoard(user?.id, id)
   }
 
   return (
@@ -111,7 +110,7 @@ const BoardTable = ({ boards, user, onUpdate }: Props) => {
         </Table>
       </TableContainer>
       <Box alignSelf={'end'} p={1}>
-        <NewBoardForm onSuccess={onUpdate} />
+        <NewBoardForm />
       </Box>
     </Paper>
   )
