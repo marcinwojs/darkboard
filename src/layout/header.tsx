@@ -12,14 +12,24 @@ import {
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import useAuthorization from '../hooks/useAuthorization'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { MouseEvent, useState } from 'react'
 import { useUserContext } from '../providers/firebaseUserProvider'
 import Avatar from '@mui/material/Avatar'
 import Logo from './logo'
 import DarkModeSwitcher from './darkModeSwitcher'
+import { isCurrentPage } from '../shared/utils'
+import { styled } from '@mui/material/styles'
+
+const HighlightTypography = styled(Typography)`
+  font-weight: bold;
+  &.current {
+    filter: invert(1);
+  }
+`
 
 const Header = () => {
+  const { pathname } = useLocation()
   const { user } = useUserContext()
   const { logout } = useAuthorization()
   const navigate = useNavigate()
@@ -85,12 +95,20 @@ const Header = () => {
                 display: { xs: 'block', md: 'none' },
               }}
             >
-              <Button onClick={() => handleNavigate('/')} sx={{display: 'block' }}>
-                <Typography fontWeight={'bold'}>Home</Typography>
+              <Button onClick={() => handleNavigate('/')} sx={{ display: 'block' }}>
+                <HighlightTypography
+                  className={(isCurrentPage('/', pathname) && 'current') || undefined}
+                >
+                  Home
+                </HighlightTypography>
               </Button>
               {user ? (
                 <Button onClick={() => handleNavigate('/boards')} sx={{ display: 'block' }}>
-                  <Typography fontWeight={'bold'}>Boards</Typography>
+                  <HighlightTypography
+                    className={(isCurrentPage('/boards', pathname) && 'current') || undefined}
+                  >
+                    Boards
+                  </HighlightTypography>
                 </Button>
               ) : null}
             </Menu>
@@ -103,11 +121,12 @@ const Header = () => {
             }}
           />
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            <Button
-              onClick={() => handleNavigate('/')}
-              sx={{ color: 'inherit', display: 'block' }}
-            >
-              <Typography fontWeight={'bold'}>Home</Typography>
+            <Button onClick={() => handleNavigate('/')} sx={{ color: 'inherit', display: 'block' }}>
+              <HighlightTypography
+                className={(isCurrentPage('/', pathname) && 'current') || undefined}
+              >
+                Home
+              </HighlightTypography>
             </Button>
 
             {user ? (
@@ -115,7 +134,11 @@ const Header = () => {
                 onClick={() => handleNavigate('/boards')}
                 sx={{ color: 'inherit', display: 'block' }}
               >
-                <Typography fontWeight={'bold'}>Boards</Typography>
+                <HighlightTypography
+                  className={(isCurrentPage('/boards', pathname) && 'current') || undefined}
+                >
+                  Boards
+                </HighlightTypography>
               </Button>
             ) : null}
           </Box>
