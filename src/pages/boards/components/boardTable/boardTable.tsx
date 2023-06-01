@@ -22,6 +22,7 @@ import moment from 'moment'
 import { convertToObjectDate } from '../../../../shared/utils'
 import { styled } from '@mui/material/styles'
 import { UserEntity } from '../../../../providers/firebaseUserProvider'
+import useConfirm from '../../../../shared/hooks/useConfirm'
 
 const CenteredCell = styled(TableCell)(() => ({
   textAlign: 'center',
@@ -50,14 +51,24 @@ type Props = {
 
 const BoardTable = ({ boards, user }: Props) => {
   const navigate = useNavigate()
+  const confirmRemove = useConfirm({
+    title: 'Remove Board',
+    body: 'Are you sure you want to remove this board?',
+    buttons: {
+      confirm: 'Confirm',
+      reject: 'Cancel',
+    },
+  })
   const { removeBoard } = useRemoveBoard()
 
   const navigateToBoard = (id: string) => {
     navigate(`/board/${id}`, { replace: true })
   }
 
-  const onRemoveBoard = (id: string) => {
-    if (user) removeBoard(user?.id, id)
+  const onRemoveBoard = async (id: string) => {
+    const confirm = await confirmRemove()
+
+    if (user && confirm) removeBoard(user?.id, id)
   }
 
   return (
