@@ -1,7 +1,7 @@
 import { TLInstanceId } from '@tldraw/tldraw'
 import '@tldraw/tldraw/editor.css'
 import '@tldraw/tldraw/ui.css'
-import { useEffect, useState, useCallback, useContext } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import useFirestore from '../../hooks/useFirestore'
 import { Box, LinearProgress, Stack, Typography, useTheme } from '@mui/material'
 import { useParams } from 'react-router-dom'
@@ -16,8 +16,6 @@ import {
   ExcalidrawElement,
   ExcalidrawImageElement,
 } from '@excalidraw/excalidraw/types/element/types'
-import { Socket } from 'net'
-import { WebsocketContext, WebsocketContextType } from '../../providers/websocketProvider'
 import useBoardRoom from '../../hooks/useBoardRoom'
 import { UserEntity, useUserContext } from '../../providers/firebaseUserProvider'
 import { rdb } from '../../config/firebase'
@@ -35,12 +33,11 @@ const baseExcalidrawElement = {
 }
 
 type Props = ExcalidrawInitialDataState & {
-  socket: Socket
   user: UserEntity
   instanceId: string
 }
 
-export function Board({ elements, appState, files, user, socket, instanceId }: Props) {
+export function Board({ elements, appState, files, user, instanceId }: Props) {
   const theme = useTheme()
   const { updateDocField, getSingleCollectionItem } = useFirestore()
   const [excalidrawAPI, excalidrawRefCallback] = useCallbackRefState<ExcalidrawImperativeAPI>()
@@ -48,7 +45,7 @@ export function Board({ elements, appState, files, user, socket, instanceId }: P
   const oldFilesSet = new Set(Object.keys(files || {}))
 
   useEffect(() => {
-    if (excalidrawAPI && socket) {
+    if (excalidrawAPI) {
       onValue(ref(rdb, `pointer-update/${instanceId}`), (snapshot) => {
         const data = snapshot.val() || {}
         delete data[user?.id]
@@ -172,7 +169,6 @@ export function Board({ elements, appState, files, user, socket, instanceId }: P
 
 const LoadBoard = () => {
   const { joinRoom } = useBoardRoom()
-  const { socket } = useContext(WebsocketContext) as WebsocketContextType
   const instanceId = useParams()?.boardId as TLInstanceId
   const [elements, setElements] = useState<ExcalidrawInitialDataState['elements'] | null>(null)
   const [files, setFiles] = useState<BinaryFiles | null>(null)
@@ -181,10 +177,7 @@ const LoadBoard = () => {
 
   useEffect(() => {
     if (user) {
-      joinRoom(instanceId, user?.id).then(() => {
-        socket.connect()
-        socket.emit('join-room', instanceId)
-      })
+      joinRoom(instanceId, user?.id)
     }
   }, [user])
 
@@ -205,14 +198,8 @@ const LoadBoard = () => {
     })
   }, [])
 
-  return files && elements && socket && user ? (
-    <Board
-      instanceId={instanceId}
-      elements={elements}
-      files={files}
-      socket={socket as unknown as Socket}
-      user={user}
-    />
+  return files && elements && user ? (
+    <Board instanceId={instanceId} elements={elements} files={files} user={user} />
   ) : (
     <Stack m={10} spacing={2}>
       <Typography textAlign={'center'}>Loading...</Typography>
