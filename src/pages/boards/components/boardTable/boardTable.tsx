@@ -72,10 +72,15 @@ const BoardTable = ({ boards, user }: Props) => {
   }
 
   return (
-    <Paper sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'end' }}>
+    <Paper>
       <TableContainer
-        component={Paper}
-        sx={{ maxWidth: '1200px', minHeight: '400px', boxShadow: 'none', mb: 1 }}
+        sx={{
+          maxWidth: '90vw',
+          minWidth: '50vw',
+          minHeight: '400px',
+          boxShadow: 'none',
+          mb: 1,
+        }}
       >
         <Table size={'small'}>
           <TableHead>
@@ -120,7 +125,7 @@ const BoardTable = ({ boards, user }: Props) => {
           </TableBody>
         </Table>
       </TableContainer>
-      <Box alignSelf={'end'} p={1}>
+      <Box justifyContent={'end'} display={'flex'} p={1}>
         <NewBoardForm />
       </Box>
     </Paper>
