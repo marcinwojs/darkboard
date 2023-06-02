@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Box, useTheme } from '@mui/material'
-import { Excalidraw, MainMenu } from '@excalidraw/excalidraw'
+import { Excalidraw } from '@excalidraw/excalidraw'
 import {
   BinaryFiles,
   ExcalidrawImperativeAPI,
@@ -19,6 +19,8 @@ import {
 import ShareButton from '../shareButton/shareButton'
 import { UserEntity } from '../../../../hooks/useFirestoreUser'
 import useBoardUpdates from '../../../../hooks/useBoardUpdates'
+import { BoardEntity } from '../../../boards/components/boardTable/boardTable'
+import CustomMainMenu from './customMainMenu'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)
@@ -37,15 +39,16 @@ export type SerializedExcalidrawElement = ExcalidrawElement & {
 type Props = ExcalidrawInitialDataState & {
   user: UserEntity
   instanceId: string
+  boardData: BoardEntity
 }
 
-const ExcalidrawBoard = ({ elements, appState, files, user, instanceId }: Props) => {
+const ExcalidrawBoard = ({ elements, appState, files, user, instanceId, boardData }: Props) => {
   const theme = useTheme()
   const {
     updatePointerPosition,
-    handlePointerUpdatePosition,
+    handleUpdatePointerPosition,
     updateBoardElements,
-    handleBoardElements,
+    handleUpdateBoardElements,
   } = useBoardUpdates({ instanceId })
   const { getSingleCollectionItem } = useFirestore()
   const [excalidrawAPI, excalidrawRefCallback] = useCallbackRefState<ExcalidrawImperativeAPI>()
@@ -54,14 +57,13 @@ const ExcalidrawBoard = ({ elements, appState, files, user, instanceId }: Props)
 
   useEffect(() => {
     if (excalidrawAPI) {
-      handlePointerUpdatePosition(user.id, (data) => {
+      handleUpdatePointerPosition(user.id, (data) => {
         excalidrawAPI?.updateScene({
           collaborators: new Map(Object.entries(data)),
         })
       })
 
-      handleBoardElements((newElements) => {
-        console.log('lol')
+      handleUpdateBoardElements((newElements) => {
         const newMap = new Map(
           excalidrawAPI.getSceneElementsIncludingDeleted()?.map((e) => [e.id, e]),
         )
@@ -127,14 +129,7 @@ const ExcalidrawBoard = ({ elements, appState, files, user, instanceId }: Props)
         onPointerUpdate={(payload) => updatePointerPosition(user, payload)}
         renderTopRightUI={() => <ShareButton id={instanceId} />}
       >
-        <MainMenu>
-          <MainMenu.DefaultItems.SaveToActiveFile />
-          <MainMenu.DefaultItems.SaveAsImage />
-          <MainMenu.DefaultItems.Help />
-          <MainMenu.DefaultItems.ClearCanvas />
-          <MainMenu.Separator />
-          <MainMenu.DefaultItems.ChangeCanvasBackground />
-        </MainMenu>
+        <CustomMainMenu boardName={boardData.boardName} />
       </Excalidraw>
     </Box>
   )

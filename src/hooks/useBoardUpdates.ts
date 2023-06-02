@@ -6,10 +6,6 @@ import useFirestore from './useFirestore'
 import { SerializedExcalidrawElement } from '../pages/board/components/excalidrawBoard/excalidrawBoard'
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
 
-type Props = {
-  instanceId: string
-}
-
 type UpdatePointerPositionPayload = {
   pointer: {
     x: number
@@ -21,6 +17,10 @@ type UpdatePointerPositionPayload = {
 
 type UserPointerEntity = UpdatePointerPositionPayload & {
   username: string
+}
+
+type Props = {
+  instanceId: string
 }
 
 const useBoardUpdates = ({ instanceId }: Props) => {
@@ -36,7 +36,7 @@ const useBoardUpdates = ({ instanceId }: Props) => {
     })
   }
 
-  const handlePointerUpdatePosition = (
+  const handleUpdatePointerPosition = (
     userId: string,
     callback: (data: Record<string, UserPointerEntity>) => void,
   ) =>
@@ -61,7 +61,7 @@ const useBoardUpdates = ({ instanceId }: Props) => {
     update(ref(rdb, `board-update/${instanceId}`), { elements: diffElements })
   }
 
-  const handleBoardElements = (callback: (newElements: ExcalidrawElement[]) => void) => {
+  const handleUpdateBoardElements = (callback: (newElements: ExcalidrawElement[]) => void) => {
     onValue(ref(rdb, `board-update/${instanceId}`), (snapshot) => {
       const { elements: newElements } = snapshot.val() || {}
 
@@ -75,9 +75,9 @@ const useBoardUpdates = ({ instanceId }: Props) => {
 
   return {
     updatePointerPosition,
-    handlePointerUpdatePosition,
+    handleUpdatePointerPosition,
     updateBoardElements,
-    handleBoardElements,
+    handleUpdateBoardElements,
   }
 }
 
