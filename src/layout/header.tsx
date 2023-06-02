@@ -62,9 +62,9 @@ const Header = () => {
     })
   }
   return (
-    <AppBar position='static'>
+    <AppBar position='static' >
       <Container maxWidth='xl'>
-        <Toolbar variant='dense' color='white' sx={{py: 5}}>
+        <Toolbar variant='dense' color='white' sx={{py: 2}}>
           <Logo sx={{ display: { xs: 'none', md: 'flex' }, mr: 5 }} />
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
