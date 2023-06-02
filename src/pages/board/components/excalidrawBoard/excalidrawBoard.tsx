@@ -18,6 +18,7 @@ import { filterFiles, serializeExcToFbase } from '../../../../shared/utils'
 import { rdb } from '../../../../config/firebase'
 import ShareButton from '../shareButton/shareButton'
 import { UserEntity } from '../../../../hooks/useFirestoreUser'
+import useBoardUpdates from '../../../../hooks/useBoardUpdates'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)
@@ -40,6 +41,7 @@ type Props = ExcalidrawInitialDataState & {
 
 const ExcalidrawBoard = ({ elements, appState, files, user, instanceId }: Props) => {
   const theme = useTheme()
+  const { updatePointerPosition, handlePointerUpdatePosition } = useBoardUpdates({ instanceId })
   const { updateDocField, getSingleCollectionItem } = useFirestore()
   const [excalidrawAPI, excalidrawRefCallback] = useCallbackRefState<ExcalidrawImperativeAPI>()
   const oldElementsMap = new Map(elements?.map((e) => [e.id, e.version]))
@@ -47,14 +49,10 @@ const ExcalidrawBoard = ({ elements, appState, files, user, instanceId }: Props)
 
   useEffect(() => {
     if (excalidrawAPI) {
-      onValue(ref(rdb, `pointer-update/${instanceId}`), (snapshot) => {
-        const data = snapshot.val() || {}
-        delete data[user?.id]
-
+      handlePointerUpdatePosition(user.id, (data) => {
         excalidrawAPI?.updateScene({
           collaborators: new Map(Object.entries(data)),
         })
-        onDisconnect(ref(rdb, `pointer-update/${instanceId}/${user.id}`)).remove()
       })
 
       onValue(ref(rdb, `board-update/${instanceId}`), (snapshot) => {
@@ -122,24 +120,6 @@ const ExcalidrawBoard = ({ elements, appState, files, user, instanceId }: Props)
     }
   }
 
-  const onPointerChange = ({
-    pointer,
-    button,
-  }: {
-    pointer: { x: number; y: number }
-    pointersMap: Map<number, Readonly<{ x: number; y: number }>>
-    button: 'down' | 'up'
-  }) => {
-    update(ref(rdb, `pointer-update/${instanceId}`), {
-      [`${user?.id}`]: {
-        pointer,
-        button,
-        username: user?.firstName || '',
-        id: user?.id,
-      },
-    })
-  }
-
   return (
     <Box width={'100%'} height={'100vh'}>
       <Excalidraw
@@ -152,7 +132,7 @@ const ExcalidrawBoard = ({ elements, appState, files, user, instanceId }: Props)
           files,
         }}
         onChange={(elements, appState, files) => onChange(elements, files)}
-        onPointerUpdate={onPointerChange}
+        onPointerUpdate={(payload) => updatePointerPosition(user, payload)}
         renderTopRightUI={() => <ShareButton id={instanceId} />}
       >
         <MainMenu>
