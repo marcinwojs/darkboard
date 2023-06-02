@@ -1,206 +1,35 @@
-import { TLInstanceId } from '@tldraw/tldraw'
-import '@tldraw/tldraw/editor.css'
-import '@tldraw/tldraw/ui.css'
-import { useEffect, useState, useCallback } from 'react'
-import useFirestore from '../../hooks/useFirestore'
-import { Box, LinearProgress, Stack, Typography, useTheme } from '@mui/material'
-import { useParams } from 'react-router-dom'
-import { Excalidraw, MainMenu } from '@excalidraw/excalidraw'
-import { ref, onValue, update, onDisconnect } from 'firebase/database'
-import {
-  BinaryFiles,
-  ExcalidrawImperativeAPI,
-  ExcalidrawInitialDataState,
-} from '@excalidraw/excalidraw/types/types'
-import {
-  ExcalidrawElement,
-  ExcalidrawImageElement,
-} from '@excalidraw/excalidraw/types/element/types'
 import useBoardRoom from '../../hooks/useBoardRoom'
-import { UserEntity, useUserContext } from '../../providers/firebaseUserProvider'
-import { rdb } from '../../config/firebase'
-import ShareButton from './components/shareButton/shareButton'
-import { filterFiles, serializeExcToFbase } from '../../shared/utils'
+import { useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { ExcalidrawInitialDataState } from '@excalidraw/excalidraw/types/types'
+import useFirestore from '../../hooks/useFirestore'
+import { LinearProgress, Stack, Typography } from '@mui/material'
+import ExcalidrawBoard from './components/excalidrawBoard/excalidrawBoard'
+import { useUserContext } from '../../providers/firebaseUserProvider'
+import { deserializeFbaseToExc } from '../../shared/utils'
 
-export function useCallbackRefState<T>() {
-  const [refValue, setRefValue] = useState<T | null>(null)
-  const refCallback = useCallback((value: T | null) => setRefValue(value), [])
-  return [refValue, refCallback] as const
-}
-
-const baseExcalidrawElement = {
-  groupIds: [],
-}
-
-type Props = ExcalidrawInitialDataState & {
-  user: UserEntity
-  instanceId: string
-}
-
-export function Board({ elements, appState, files, user, instanceId }: Props) {
-  const theme = useTheme()
-  const { updateDocField, getSingleCollectionItem } = useFirestore()
-  const [excalidrawAPI, excalidrawRefCallback] = useCallbackRefState<ExcalidrawImperativeAPI>()
-  const oldElementsMap = new Map(elements?.map((e) => [e.id, e.version]))
-  const oldFilesSet = new Set(Object.keys(files || {}))
-
-  useEffect(() => {
-    if (excalidrawAPI) {
-      onValue(ref(rdb, `pointer-update/${instanceId}`), (snapshot) => {
-        const data = snapshot.val() || {}
-        delete data[user?.id]
-
-        excalidrawAPI?.updateScene({
-          collaborators: new Map(Object.entries(data)),
-        })
-        onDisconnect(ref(rdb, `pointer-update/${instanceId}/${user.id}`)).remove()
-      })
-
-      onValue(ref(rdb, `board-update/${instanceId}`), (snapshot) => {
-        const { elements: newElements } = snapshot.val() || {}
-        if (newElements) {
-          const newMap = new Map(
-            excalidrawAPI.getSceneElementsIncludingDeleted()?.map((e) => [e.id, e]),
-          )
-          const diffs: ExcalidrawElement[] = []
-
-          newElements.forEach((element: ExcalidrawElement) => {
-            if (oldElementsMap.get(element.id) !== element.version) {
-              diffs.push(element)
-              newMap.set(element.id, { ...baseExcalidrawElement, ...element })
-              oldElementsMap.set(element.id, element.version)
-            }
-          })
-
-          if (diffs.length) {
-            const newFiles: string[] = []
-            const newSet = new Set(Object.keys(excalidrawAPI.getFiles() || {}))
-
-            diffs.forEach((element) => {
-              const imageElement = element as ExcalidrawImageElement
-              if (imageElement.fileId && !newSet.has(imageElement.fileId)) {
-                newFiles.push(imageElement.fileId)
-                oldFilesSet.add(imageElement.fileId)
-              }
-            })
-
-            if (newFiles.length) {
-              getSingleCollectionItem({
-                collectionId: 'boardsContent',
-                id: `${instanceId}`,
-              }).then((data) => excalidrawAPI?.addFiles(Object.values(data.files)))
-            }
-            excalidrawAPI?.updateScene({ elements: Array.from(newMap.values()) })
-          }
-        }
-        onDisconnect(ref(rdb, `board-update/${instanceId}`)).remove()
-      })
-    }
-  }, [excalidrawAPI])
-
-  const onChange = (elements: readonly ExcalidrawElement[], files: BinaryFiles) => {
-    const diffs: ExcalidrawElement[] = []
-
-    elements.forEach((element: ExcalidrawElement) => {
-      if (oldElementsMap.get(element.id) !== element.version) {
-        diffs.push(element)
-        oldElementsMap.set(element.id, element.version)
-      }
-    })
-
-    if (diffs.length > 0) {
-      const serializedElements = serializeExcToFbase(elements)
-      const filteredFiles = filterFiles(files, oldFilesSet)
-
-      updateDocField({
-        collectionId: 'boardsContent',
-        data: { elements: serializedElements, ...filteredFiles },
-        id: instanceId,
-      })
-      update(ref(rdb, `board-update/${instanceId}`), { elements: diffs })
-    }
-  }
-
-  const onPointerChange = ({
-    pointer,
-    button,
-  }: {
-    pointer: { x: number; y: number }
-    pointersMap: Map<number, Readonly<{ x: number; y: number }>>
-    button: 'down' | 'up'
-  }) => {
-    update(ref(rdb, `pointer-update/${instanceId}`), {
-      [`${user?.id}`]: {
-        pointer,
-        button,
-        username: user?.firstName || '',
-        id: user?.id,
-      },
-    })
-  }
-
-  return (
-    <Box width={'100%'} height={'100vh'}>
-      <Excalidraw
-        theme={theme.palette.mode}
-        autoFocus
-        ref={(api) => excalidrawRefCallback(api as ExcalidrawImperativeAPI)}
-        initialData={{
-          elements,
-          appState,
-          files,
-        }}
-        onChange={(elements, appState, files) => onChange(elements, files)}
-        onPointerUpdate={onPointerChange}
-        renderTopRightUI={() => <ShareButton id={instanceId} />}
-      >
-        <MainMenu>
-          <MainMenu.DefaultItems.SaveToActiveFile />
-          <MainMenu.DefaultItems.SaveAsImage />
-          <MainMenu.DefaultItems.Help />
-          <MainMenu.DefaultItems.ClearCanvas />
-          <MainMenu.Separator />
-          <MainMenu.DefaultItems.ChangeCanvasBackground />
-        </MainMenu>
-      </Excalidraw>
-    </Box>
-  )
-}
-
-const LoadBoard = () => {
+const Board = () => {
   const { joinRoom } = useBoardRoom()
-  const instanceId = useParams()?.boardId as TLInstanceId
-  const [elements, setElements] = useState<ExcalidrawInitialDataState['elements'] | null>(null)
-  const [files, setFiles] = useState<BinaryFiles | null>(null)
+  const instanceId = useParams()?.boardId as string
+  const [initData, setInitData] = useState<ExcalidrawInitialDataState | null>(null)
   const { getSingleCollectionItem } = useFirestore()
   const { user } = useUserContext()
 
   useEffect(() => {
-    if (user) {
-      joinRoom(instanceId, user?.id)
-    }
+    if (user) joinRoom(instanceId, user?.id)
   }, [user])
 
   useEffect(() => {
     getSingleCollectionItem({ collectionId: 'boardsContent', id: instanceId }).then((data) => {
-      const deserializedElements = [...data.elements].map((element) => {
-        const points = element?.points
-        if (points) {
-          return {
-            ...element,
-            points: JSON.parse(points),
-          }
-        } else return element
-      })
-
-      setElements(deserializedElements)
-      setFiles(data.files)
+      setInitData({ elements: deserializeFbaseToExc(data.elements), files: data.files })
     })
   }, [])
 
-  return files && elements && user ? (
-    <Board instanceId={instanceId} elements={elements} files={files} user={user} />
-  ) : (
+  if (initData && user) {
+    return <ExcalidrawBoard instanceId={instanceId} user={user} {...initData} />
+  }
+
+  return (
     <Stack m={10} spacing={2}>
       <Typography textAlign={'center'}>Loading...</Typography>
       <LinearProgress />
@@ -208,4 +37,4 @@ const LoadBoard = () => {
   )
 }
 
-export default LoadBoard
+export default Board

@@ -1,7 +1,8 @@
 import { Timestamp } from 'firebase/firestore'
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
 import { BinaryFiles } from '@excalidraw/excalidraw/types/types'
-import { matchPath, useLocation } from 'react-router-dom'
+import { matchPath } from 'react-router-dom'
+import { SerializedExcalidrawElement } from '../pages/board/components/excalidrawBoard/excalidrawBoard'
 const convertFromDateObject = (date: Date) => Timestamp.fromDate(date)
 
 const convertToObjectDate = (timeObject: { seconds: number; nanoseconds: number }) =>
@@ -18,6 +19,17 @@ export const serializeExcToFbase = (elements: readonly ExcalidrawElement[]) =>
       return acc
     }, {}),
   )
+
+export const deserializeFbaseToExc = (elements: SerializedExcalidrawElement[]) =>
+  elements.map((element) => {
+    const points = element?.points
+    if (points) {
+      return {
+        ...element,
+        points: JSON.parse(points),
+      }
+    } else return element
+  })
 
 export const filterFiles = (files: BinaryFiles, oldFilesSet: Set<string>) => {
   const filteredFiles = files

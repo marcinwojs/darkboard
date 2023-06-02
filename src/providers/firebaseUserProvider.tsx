@@ -8,6 +8,7 @@ export type UserEntity = {
   id: string
   email: string
   photo?: string
+  userBoards: string[]
 }
 
 export type FirebaseUserContextType = {
@@ -36,20 +37,19 @@ const FirebaseUserProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setLoaded(true)
         return
       }
-      if (userData?.providerData[0].providerId === 'password') {
-        getSingleCollectionItem({ collectionId: 'users', id: userData.uid }).then((data) => {
+      getSingleCollectionItem({ collectionId: 'users', id: userData.uid }).then((data) => {
+        if (userData?.providerData[0].providerId === 'password') {
           if (data) setUser(data as UserEntity)
           setLoaded(true)
+          return
+        }
+        setUser({
+          ...(data as UserEntity),
+          photo: userData.photoURL || undefined,
         })
-        return
-      }
-      setUser({
-        firstName: userData.displayName || '',
-        email: userData.email || '',
-        photo: userData.photoURL || undefined,
-        id: userData.uid,
+        if (data) setUser(data as UserEntity)
+        setLoaded(true)
       })
-      setLoaded(true)
     })
   }, [])
 
