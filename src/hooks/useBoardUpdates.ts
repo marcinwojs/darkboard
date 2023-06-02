@@ -1,7 +1,10 @@
 import { onDisconnect, onValue, ref, update } from 'firebase/database'
 import { rdb } from '../config/firebase'
 import { UserEntity } from '../providers/firebaseUserProvider'
-import { Gesture } from '@excalidraw/excalidraw/types/types'
+import { BinaryFiles, Gesture } from '@excalidraw/excalidraw/types/types'
+import useFirestore from './useFirestore'
+import { SerializedExcalidrawElement } from '../pages/board/components/excalidrawBoard/excalidrawBoard'
+import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
 
 type Props = {
   instanceId: string
@@ -21,6 +24,8 @@ type UserPointerEntity = UpdatePointerPositionPayload & {
 }
 
 const useBoardUpdates = ({ instanceId }: Props) => {
+  const { updateDocField } = useFirestore()
+
   const updatePointerPosition = (user: UserEntity, payload: UpdatePointerPositionPayload) => {
     update(ref(rdb, `pointer-update/${instanceId}`), {
       [`${user?.id}`]: {
@@ -43,7 +48,37 @@ const useBoardUpdates = ({ instanceId }: Props) => {
       onDisconnect(ref(rdb, `pointer-update/${instanceId}/${userId}`)).remove()
     })
 
-  return { updatePointerPosition, handlePointerUpdatePosition }
+  const updateBoardElements = (
+    diffElements: ExcalidrawElement[],
+    serializedElements: SerializedExcalidrawElement[],
+    files: BinaryFiles,
+  ) => {
+    updateDocField({
+      collectionId: 'boardsContent',
+      data: { elements: serializedElements, ...files },
+      id: instanceId,
+    })
+    update(ref(rdb, `board-update/${instanceId}`), { elements: diffElements })
+  }
+
+  const handleBoardElements = (callback: (newElements: ExcalidrawElement[]) => void) => {
+    onValue(ref(rdb, `board-update/${instanceId}`), (snapshot) => {
+      const { elements: newElements } = snapshot.val() || {}
+
+      if (newElements) {
+        callback(newElements)
+      }
+
+      onDisconnect(ref(rdb, `board-update/${instanceId}`)).remove()
+    })
+  }
+
+  return {
+    updatePointerPosition,
+    handlePointerUpdatePosition,
+    updateBoardElements,
+    handleBoardElements,
+  }
 }
 
 export default useBoardUpdates

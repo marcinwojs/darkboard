@@ -11,13 +11,14 @@ const convertToObjectDate = (timeObject: { seconds: number; nanoseconds: number 
 export { convertToObjectDate, convertFromDateObject }
 
 export const serializeExcToFbase = (elements: readonly ExcalidrawElement[]) =>
-  [...elements].map((element: Record<string, unknown>) =>
-    Object.keys(element).reduce<Record<string, unknown>>((acc, key) => {
-      if (element[key] !== undefined) {
-        acc[key] = key === 'points' ? JSON.stringify(element[key]) : element[key]
-      }
-      return acc
-    }, {}),
+  [...elements].map(
+    (element: Record<string, unknown>) =>
+      Object.keys(element).reduce<Record<string, unknown>>((acc, key) => {
+        if (element[key] !== undefined) {
+          acc[key] = key === 'points' ? JSON.stringify(element[key]) : element[key]
+        }
+        return acc
+      }, {}) as SerializedExcalidrawElement,
   )
 
 export const deserializeFbaseToExc = (elements: SerializedExcalidrawElement[]) =>
@@ -31,19 +32,10 @@ export const deserializeFbaseToExc = (elements: SerializedExcalidrawElement[]) =
     } else return element
   })
 
-export const filterFiles = (files: BinaryFiles, oldFilesSet: Set<string>) => {
-  const filteredFiles = files
+export const filterFilesToFirestore = (files: BinaryFiles, oldFilesSet: Set<string>) => {
+  const filteredFilesIds = Object.keys(files).filter((fileId) => !oldFilesSet.has(fileId))
 
-  Object.keys(files).forEach((fileId) => {
-    if (oldFilesSet.has(fileId)) {
-      delete filteredFiles[fileId]
-    }
-  })
-
-  return Object.keys(filteredFiles).reduce<Record<string, unknown>>(
-    (a, c) => ((a[`files.${c}`] = filteredFiles[c]), a),
-    {},
-  )
+  return filteredFilesIds.reduce<BinaryFiles>((a, c) => ((a[`files.${c}`] = files[c]), a), {})
 }
 
 export const isCurrentPage = (pathname: string, currentPath: string) => {
@@ -54,3 +46,11 @@ export const isCurrentPage = (pathname: string, currentPath: string) => {
     currentPath,
   )
 }
+
+export const getDiffElements = (
+  newElements: readonly ExcalidrawElement[],
+  oldElementsMap: Map<string, number>,
+) =>
+  newElements.filter(
+    (element: ExcalidrawElement) => oldElementsMap.get(element.id) !== element.version,
+  )
