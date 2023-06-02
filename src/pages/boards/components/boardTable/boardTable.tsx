@@ -13,7 +13,7 @@ import {
 import { useNavigate } from 'react-router-dom'
 import useRemoveBoard from '../../../../hooks/useRemoveBoard'
 import LoginIcon from '@mui/icons-material/Login'
-import { DeleteForever } from '@mui/icons-material'
+import { DeleteForever, Logout } from '@mui/icons-material'
 import ShareButton from '../../../board/components/shareButton/shareButton'
 import AvatarGroup from '../../../../shared/components/avatar/avatarGroup'
 import NewBoardForm from '../newBoardForm/newBoardForm'
@@ -23,6 +23,7 @@ import { convertToObjectDate } from '../../../../shared/utils'
 import { styled } from '@mui/material/styles'
 import { UserEntity } from '../../../../providers/firebaseUserProvider'
 import useConfirm from '../../../../shared/hooks/useConfirm'
+import useBoardRoom from '../../../../hooks/useBoardRoom'
 
 const CenteredCell = styled(TableCell)(() => ({
   textAlign: 'center',
@@ -52,14 +53,23 @@ type Props = {
 const BoardTable = ({ boards, user }: Props) => {
   const navigate = useNavigate()
   const confirmRemove = useConfirm({
-    title: 'Remove Board',
-    body: 'Are you sure you want to remove this board?',
+    title: 'Delete board',
+    body: 'Are you sure you want to delete this board? This action will permanently remove the board you created and remove it from all participants lists.',
+    buttons: {
+      confirm: 'Confirm',
+      reject: 'Cancel',
+    },
+  })
+  const confirmLeave = useConfirm({
+    title: 'Remove from board',
+    body: 'Are you sure you want to remove yourself from this board? This action will remove you as a participant from the board, and you will no longer have access to it.',
     buttons: {
       confirm: 'Confirm',
       reject: 'Cancel',
     },
   })
   const { removeBoard } = useRemoveBoard()
+  const { leaveRoom } = useBoardRoom()
 
   const navigateToBoard = (id: string) => {
     navigate(`/board/${id}`, { replace: true })
@@ -69,6 +79,11 @@ const BoardTable = ({ boards, user }: Props) => {
     const confirm = await confirmRemove()
 
     if (user && confirm) removeBoard(user?.id, id)
+  }
+  const onLeaveBoard = async (id: string) => {
+    const confirm = await confirmLeave()
+
+    if (user && confirm) leaveRoom(id, user.id)
   }
 
   return (
@@ -117,7 +132,11 @@ const BoardTable = ({ boards, user }: Props) => {
                       <Button onClick={() => onRemoveBoard(boardId)}>
                         <DeleteForever />
                       </Button>
-                    ) : null}
+                    ) : (
+                      <Button onClick={() => onLeaveBoard(boardId)}>
+                        <Logout />
+                      </Button>
+                    )}
                   </CenteredCell>
                 </TableRow>
               ),
