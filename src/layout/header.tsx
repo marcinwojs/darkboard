@@ -61,6 +61,7 @@ const Header = () => {
       navigate('/', { replace: true })
     })
   }
+
   return (
     <AppBar position='static' >
       <Container maxWidth='xl'>

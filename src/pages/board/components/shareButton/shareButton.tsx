@@ -1,5 +1,5 @@
 import { Snackbar } from '@mui/material'
-import { useState } from 'react'
+import React, { useState } from 'react'
 import ShareIcon from '@mui/icons-material/Share'
 import TooltipButton from '../../../../shared/components/tooltipButton/tooltipButton'
 
@@ -18,7 +18,7 @@ const ShareButton = ({ id }: Props) => {
 
   return (
     <>
-      <TooltipButton tipText={'Copy board URL'} onClick={handleClick}>
+      <TooltipButton variant={'outlined'} tipText={'Copy board URL'} onClick={handleClick}>
         <ShareIcon />
       </TooltipButton>
       <Snackbar
@@ -31,4 +31,4 @@ const ShareButton = ({ id }: Props) => {
   )
 }
 
-export default ShareButton
+export default React.memo(ShareButton)
