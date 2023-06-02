@@ -1,6 +1,5 @@
 import {
   Box,
-  Button,
   Chip,
   Paper,
   Table,
@@ -24,6 +23,7 @@ import { styled } from '@mui/material/styles'
 import { UserEntity } from '../../../../providers/firebaseUserProvider'
 import useConfirm from '../../../../shared/hooks/useConfirm'
 import useBoardRoom from '../../../../hooks/useBoardRoom'
+import TooltipButton from '../../../../shared/components/tooltipButton/tooltipButton'
 
 const CenteredCell = styled(TableCell)(() => ({
   textAlign: 'center',
@@ -90,8 +90,6 @@ const BoardTable = ({ boards, user }: Props) => {
     <Paper>
       <TableContainer
         sx={{
-          maxWidth: '90vw',
-          minWidth: '50vw',
           minHeight: '400px',
           boxShadow: 'none',
           mb: 1,
@@ -124,18 +122,24 @@ const BoardTable = ({ boards, user }: Props) => {
                     {creatorId === user.id ? <Chip label='My Board' color='primary' /> : null}
                   </CenteredCell>
                   <CenteredCell>
-                    <Button onClick={() => navigateToBoard(boardId)}>
+                    <TooltipButton tipText={'Go to board'} onClick={() => navigateToBoard(boardId)}>
                       <LoginIcon />
-                    </Button>
+                    </TooltipButton>
                     <ShareButton id={boardId} />
                     {creatorId === user.id ? (
-                      <Button onClick={() => onRemoveBoard(boardId)}>
+                      <TooltipButton
+                        tipText={'Delete Board'}
+                        onClick={() => onRemoveBoard(boardId)}
+                      >
                         <DeleteForever />
-                      </Button>
+                      </TooltipButton>
                     ) : (
-                      <Button onClick={() => onLeaveBoard(boardId)}>
+                      <TooltipButton
+                        tipText={'Remove me from Board'}
+                        onClick={() => onLeaveBoard(boardId)}
+                      >
                         <Logout />
-                      </Button>
+                      </TooltipButton>
                     )}
                   </CenteredCell>
                 </TableRow>

@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material'
+import { Grid } from '@mui/material'
 import { collection, query, where, getDocs, doc, onSnapshot } from 'firebase/firestore'
 import { SetStateAction, useEffect, useState } from 'react'
 import { useUserContext } from '../../providers/firebaseUserProvider'
@@ -32,9 +32,11 @@ const BoardsPage = () => {
   }, [])
 
   return (
-    <Stack alignItems={'center'} justifyContent={'center'} pt={10}>
-      {user && <BoardTable user={user} boards={boards} />}
-    </Stack>
+    <Grid container justifyContent={'center'} pt={10}>
+      <Grid item xs={10} md={8}>
+        {user && <BoardTable user={user} boards={boards} />}
+      </Grid>
+    </Grid>
   )
 }
 

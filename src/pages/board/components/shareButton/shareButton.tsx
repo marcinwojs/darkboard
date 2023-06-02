@@ -1,6 +1,7 @@
-import { Button, Snackbar } from '@mui/material'
+import { Snackbar } from '@mui/material'
 import { useState } from 'react'
 import ShareIcon from '@mui/icons-material/Share'
+import TooltipButton from '../../../../shared/components/tooltipButton/tooltipButton'
 
 type Props = {
   id: string
@@ -17,9 +18,9 @@ const ShareButton = ({ id }: Props) => {
 
   return (
     <>
-      <Button onClick={handleClick}>
+      <TooltipButton tipText={'Copy board URL'} onClick={handleClick}>
         <ShareIcon />
-      </Button>
+      </TooltipButton>
       <Snackbar
         open={open}
         onClose={() => setOpen(false)}
