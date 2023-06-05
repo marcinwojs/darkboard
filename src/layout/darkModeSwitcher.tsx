@@ -1,6 +1,6 @@
 import { Switch, Tooltip } from '@mui/material'
 import { styled } from '@mui/material/styles'
-import { useAppThemeContext } from '../providers/appThemeProvider'
+import { useAppLayoutContext } from '../providers/appLayoutProvider'
 
 const MaterialUISwitch = styled(Switch)(({ theme }) => ({
   width: 62,
@@ -48,7 +48,7 @@ const MaterialUISwitch = styled(Switch)(({ theme }) => ({
 }))
 
 const DarkModeSwitcher = () => {
-  const { mode, changeThemeMode } = useAppThemeContext()
+  const { mode, changeThemeMode } = useAppLayoutContext()
 
   return (
     <Tooltip title='Change app theme'>

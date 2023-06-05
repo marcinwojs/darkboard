@@ -11,14 +11,14 @@ import {
   Typography,
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
-import useAuthorization from '../hooks/useAuthorization'
+import useAuthorization from '../../hooks/useAuthorization'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { MouseEvent, useState } from 'react'
-import { useUserContext } from '../providers/firebaseUserProvider'
+import { useUserContext } from '../../providers/firebaseUserProvider'
 import Avatar from '@mui/material/Avatar'
-import Logo from './logo'
-import DarkModeSwitcher from './darkModeSwitcher'
-import { isCurrentPage } from '../shared/utils'
+import Logo from '../logo'
+import DarkModeSwitcher from '../darkModeSwitcher'
+import { isCurrentPage } from '../../shared/utils'
 import { styled } from '@mui/material/styles'
 
 const HighlightTypography = styled(Typography)`
@@ -63,9 +63,9 @@ const Header = () => {
   }
 
   return (
-    <AppBar position='static' >
+    <AppBar position='static' sx={{ height: '70px' }}>
       <Container maxWidth='xl'>
-        <Toolbar variant='dense' color='white' sx={{py: 2}}>
+        <Toolbar variant='dense' color='white' sx={{ py: 2 }}>
           <Logo sx={{ display: { xs: 'none', md: 'flex' }, mr: 5 }} />
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton

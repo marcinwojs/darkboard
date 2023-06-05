@@ -3,19 +3,30 @@ import { PaletteMode, ThemeProvider } from '@mui/material'
 import theme from '../theme'
 import Cookies from 'js-cookie'
 
-export type AppThemeContextType = {
+export enum HeaderMode {
+  'fullscreen' = 'fullscreen',
+  'focus' = 'focus',
+  'regular' = 'regular',
+}
+
+export type AppLayoutContextType = {
+  headerMode: HeaderMode
   mode: PaletteMode
+  changeHeaderMode: (mode: HeaderMode) => void
   changeThemeMode: (mode: PaletteMode) => void
 }
 
-export const AppThemeContext = createContext<AppThemeContextType>({
+export const AppThemeContext = createContext<AppLayoutContextType>({
+  headerMode: HeaderMode.regular,
   mode: 'dark',
+  changeHeaderMode: () => null,
   changeThemeMode: () => null,
 })
 
-export const useAppThemeContext = () => useContext<AppThemeContextType>(AppThemeContext)
+export const useAppLayoutContext = () => useContext<AppLayoutContextType>(AppThemeContext)
 
-const AppThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
+const AppLayoutProvider: FC<{ children: ReactNode }> = ({ children }) => {
+  const [headerMode, setHeaderMode] = useState<HeaderMode>(HeaderMode.regular)
   const [mode, setMode] = useState<PaletteMode>((Cookies.get('appTheme') as PaletteMode) || 'dark')
 
   useEffect(() => {
@@ -29,11 +40,15 @@ const AppThemeProvider: FC<{ children: ReactNode }> = ({ children }) => {
     Cookies.set('appTheme', mode, { expires: 30 })
   }
 
+  const changeHeaderMode = (mode: HeaderMode) => {
+    setHeaderMode(mode)
+  }
+
   return (
-    <AppThemeContext.Provider value={{ changeThemeMode, mode }}>
+    <AppThemeContext.Provider value={{ headerMode, mode, changeHeaderMode, changeThemeMode }}>
       <ThemeProvider theme={theme(mode)}>{children}</ThemeProvider>
     </AppThemeContext.Provider>
   )
 }
 
-export default AppThemeProvider
+export default AppLayoutProvider

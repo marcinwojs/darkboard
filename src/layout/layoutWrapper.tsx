@@ -1,6 +1,6 @@
 import { Box, Container } from '@mui/material'
 import { ReactNode } from 'react'
-import Header from './header'
+import DynamicHeader from './header/dynamicHeader'
 
 type Props = {
   children: ReactNode
@@ -8,13 +8,9 @@ type Props = {
 
 const LayoutWrapper = ({ children }: Props) => {
   return (
-    <Box >
-      <Header/>
-      <Container
-        maxWidth={false}
-        sx={{ height: 'inherit'}}
-        disableGutters
-      >
+    <Box>
+      <DynamicHeader />
+      <Container maxWidth={false} sx={{ height: 'inherit' }} disableGutters>
         {children}
       </Container>
     </Box>

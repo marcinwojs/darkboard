@@ -1,29 +1,39 @@
 import { ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material'
-import { useState, MouseEvent, memo } from 'react'
+import { MouseEvent, memo } from 'react'
 import CenterFocusStrongIcon from '@mui/icons-material/CenterFocusStrong'
 import WebAssetIcon from '@mui/icons-material/WebAsset'
 import CropFreeIcon from '@mui/icons-material/CropFree'
-const ViewModeToggle = () => {
-  const [viewMode, setViewMode] = useState('focus')
+import { HeaderMode, useAppLayoutContext } from '../../../../providers/appLayoutProvider'
 
-  const handleChange = (event: MouseEvent<HTMLElement>, newAlignment: string) => {
-    setViewMode(newAlignment)
+const ViewModeToggle = () => {
+  const { headerMode, changeHeaderMode } = useAppLayoutContext()
+
+  const handleChange = (event: MouseEvent<HTMLElement>, mode: HeaderMode) => {
+    changeHeaderMode(mode)
   }
 
+  const fullscreenRequest = () => document.documentElement.requestFullscreen()
+
   return (
-    <ToggleButtonGroup value={viewMode} exclusive onChange={handleChange}>
+    <ToggleButtonGroup value={headerMode} exclusive onChange={handleChange}>
       <Tooltip title={'Fullscreen'} sx={{ width: '100%' }}>
-        <ToggleButton sx={{ py: 0 }} value='fullscreen' selected={viewMode === 'fullscreen'}>
+        <ToggleButton
+          id={'fullscreenBtn'}
+          sx={{ py: 0 }}
+          value='fullscreen'
+          selected={headerMode === 'fullscreen'}
+          onClick={fullscreenRequest}
+        >
           <CropFreeIcon />
         </ToggleButton>
       </Tooltip>
       <Tooltip title={'Focus mode'}>
-        <ToggleButton sx={{ py: 0 }} value='focus' selected={viewMode === 'focus'}>
+        <ToggleButton sx={{ py: 0 }} value='focus' selected={headerMode === 'focus'}>
           <CenterFocusStrongIcon />
         </ToggleButton>
       </Tooltip>
       <Tooltip title={'Regular'}>
-        <ToggleButton sx={{ py: 0 }} value='regular' selected={viewMode === 'regular'}>
+        <ToggleButton sx={{ py: 0 }} value='regular' selected={headerMode === 'regular'}>
           <WebAssetIcon />
         </ToggleButton>
       </Tooltip>

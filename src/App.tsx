@@ -8,11 +8,11 @@ import FirebaseUserProvider from './providers/firebaseUserProvider'
 import '@tldraw/tldraw/editor.css'
 import '@tldraw/tldraw/ui.css'
 import LayoutWrapper from './layout/layoutWrapper'
-import AppThemeProvider from './providers/appThemeProvider'
+import AppLayoutProvider from './providers/appLayoutProvider'
 
 function App() {
   return (
-    <AppThemeProvider>
+    <AppLayoutProvider>
       <CssBaseline />
       <FirebaseUserProvider>
         <ErrorBoundary
@@ -26,7 +26,7 @@ function App() {
           </BrowserRouter>
         </ErrorBoundary>
       </FirebaseUserProvider>
-    </AppThemeProvider>
+    </AppLayoutProvider>
   )
 }
 
