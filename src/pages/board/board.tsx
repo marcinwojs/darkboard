@@ -8,6 +8,8 @@ import ExcalidrawBoard from './components/excalidrawBoard/excalidrawBoard'
 import { useUserContext } from '../../providers/firebaseUserProvider'
 import { deserializeFbaseToExc } from '../../shared/utils'
 import { BoardEntity } from '../boards/components/boardTable/boardTable'
+import { rectNotesList } from '../../libraries/stickyNotes/rectNote'
+import { colorNotesList } from '../../libraries/stickyNotes/colorNote'
 
 const Board = () => {
   const { joinRoom } = useBoardRoom()
@@ -39,7 +41,15 @@ const Board = () => {
     )
   }
 
-  return <ExcalidrawBoard instanceId={instanceId} user={user} {...initData} boardData={boardData} />
+  return (
+    <ExcalidrawBoard
+      instanceId={instanceId}
+      user={user}
+      {...initData}
+      boardData={boardData}
+      libraryItems={[...colorNotesList, ...rectNotesList]}
+    />
+  )
 }
 
 export default Board

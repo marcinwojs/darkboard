@@ -42,7 +42,15 @@ type Props = ExcalidrawInitialDataState & {
   boardData: BoardEntity
 }
 
-const ExcalidrawBoard = ({ elements, appState, files, user, instanceId, boardData }: Props) => {
+const ExcalidrawBoard = ({
+  elements,
+  appState,
+  files,
+  user,
+  instanceId,
+  boardData,
+  libraryItems,
+}: Props) => {
   const theme = useTheme()
   const {
     updatePointerPosition,
@@ -124,6 +132,7 @@ const ExcalidrawBoard = ({ elements, appState, files, user, instanceId, boardDat
           elements,
           appState,
           files,
+          libraryItems,
         }}
         onChange={(elements, appState, files) => onChange(elements, files)}
         onPointerUpdate={(payload) => updatePointerPosition(user, payload)}
