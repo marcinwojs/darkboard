@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Box, useTheme } from '@mui/material'
+import { Box, Stack, useTheme } from '@mui/material'
 import { Excalidraw } from '@excalidraw/excalidraw'
 import {
   BinaryFiles,
@@ -21,6 +21,7 @@ import { UserEntity } from '../../../../hooks/useFirestoreUser'
 import useBoardUpdates from '../../../../hooks/useBoardUpdates'
 import { BoardEntity } from '../../../boards/components/boardTable/boardTable'
 import CustomMainMenu from './customMainMenu'
+import ViewModeToggle from '../viewModeToggle/viewModeToggle'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)
@@ -123,7 +124,7 @@ const ExcalidrawBoard = ({
   }
 
   return (
-    <Box width={'100%'} height={'100vh'}>
+    <Box width={'100%'} height={'inherit'}>
       <Excalidraw
         theme={theme.palette.mode}
         autoFocus
@@ -136,7 +137,12 @@ const ExcalidrawBoard = ({
         }}
         onChange={(elements, appState, files) => onChange(elements, files)}
         onPointerUpdate={(payload) => updatePointerPosition(user, payload)}
-        renderTopRightUI={() => <ShareButton id={instanceId} />}
+        renderTopRightUI={() => (
+          <Stack direction={'row'} spacing={1.5}>
+            <ViewModeToggle />
+            <ShareButton id={instanceId} />
+          </Stack>
+        )}
       >
         <CustomMainMenu boardName={boardData.boardName} />
       </Excalidraw>

@@ -1,26 +1,9 @@
 import Header from './header'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { HeaderMode, useAppLayoutContext } from '../../providers/appLayoutProvider'
-import { Box } from '@mui/material'
-import { styled } from '@mui/material/styles'
-
-const HeaderWrapper = styled(Box)(() => ({
-  transition: 'all 0.3s',
-  position: 'absolute',
-  zIndex: 100,
-  top: '-66px',
-  width: '100%',
-
-  '&.open': {
-    transition: 'all 0.5s',
-    top: '0',
-  },
-}))
 
 const DynamicHeader = () => {
   const { headerMode, changeHeaderMode } = useAppLayoutContext()
-  const headerBoxRef = useRef<HTMLDivElement>(null)
-  const [openHeader, setOpenHeader] = useState(false)
   const lastNonFullscreen = useRef<HeaderMode>(HeaderMode.regular)
 
   useEffect(() => {
@@ -31,19 +14,7 @@ const DynamicHeader = () => {
         document.exitFullscreen()
       }
     }
-    setOpenHeader(false)
   }, [headerMode])
-
-  const handleCursorIn = (event: MouseEvent) => {
-    const y = event.clientY
-
-    if (y >= 10 && y <= 20) {
-      setOpenHeader(true)
-    }
-  }
-  const handleMouseLeave = () => {
-    setOpenHeader(false)
-  }
 
   const handleFullscreenChange = () => {
     if (document.fullscreenElement) {
@@ -65,19 +36,12 @@ const DynamicHeader = () => {
   }
 
   useEffect(() => {
-    document.addEventListener('mousemove', handleCursorIn)
     window.addEventListener('fullscreenchange', handleFullscreenChange)
     document.addEventListener('keydown', handleKeyDown)
 
-    if (headerBoxRef.current) headerBoxRef.current.addEventListener('mouseleave', handleMouseLeave)
-
     return () => {
-      document.removeEventListener('mousemove', handleCursorIn)
       window.removeEventListener('fullscreenchange', handleFullscreenChange)
       document.removeEventListener('keydown', handleKeyDown)
-
-      if (headerBoxRef.current)
-        headerBoxRef.current.removeEventListener('mouseleave', handleMouseLeave)
     }
   }, [headerMode])
 
@@ -85,11 +49,7 @@ const DynamicHeader = () => {
     return <Header />
   }
 
-  return (
-    <HeaderWrapper ref={headerBoxRef} className={openHeader ? 'open' : undefined}>
-      <Header />
-    </HeaderWrapper>
-  )
+  return null
 }
 
 export default DynamicHeader
