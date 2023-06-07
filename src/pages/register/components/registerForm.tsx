@@ -24,7 +24,7 @@ const RegisterForm = () => {
     if (password === confirmPassword) {
       signUp({ email, password, firstName })
         .then(() => {
-          navigate('/', { replace: true })
+          navigate('/boards', { replace: true })
         })
         .catch((error) => {
           setError(error.code)
