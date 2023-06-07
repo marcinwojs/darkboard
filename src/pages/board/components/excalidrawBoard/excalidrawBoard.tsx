@@ -61,8 +61,10 @@ const ExcalidrawBoard = ({
   } = useBoardUpdates({ instanceId })
   const { getSingleCollectionItem } = useFirestore()
   const [excalidrawAPI, excalidrawRefCallback] = useCallbackRefState<ExcalidrawImperativeAPI>()
-  const oldElementsMap = new Map(elements?.map((e) => [e.id, e.version]))
-  const oldFilesSet = new Set(Object.keys(files || {}))
+  const [oldElementsMap, setOldElementsMap] = useState(
+    new Map(elements?.map((e) => [e.id, e.version])),
+  )
+  const [oldFilesSet, setOldFilesSet] = useState(new Set(Object.keys(files || {})))
 
   useEffect(() => {
     if (excalidrawAPI) {
@@ -86,29 +88,33 @@ const ExcalidrawBoard = ({
             newMap.set(element.id, { ...baseExcalidrawElement, ...element })
 
             if (imageElement.fileId && !newSet.has(imageElement.fileId)) {
-              oldFilesSet.add(imageElement.fileId)
+              newSet.add(imageElement.fileId)
               return true
             }
           })
 
           if (newFilesElements.length) {
+            setOldFilesSet(newSet)
             getSingleCollectionItem({
               collectionId: 'boardsContent',
               id: `${instanceId}`,
             }).then((data) => excalidrawAPI?.addFiles(Object.values(data.files)))
           }
-
           updateOldElementsMap(diffs)
-          excalidrawAPI?.updateScene({ elements: Array.from(newMap.values()) })
+          excalidrawAPI?.updateScene({ elements: [...newMap.values()] })
         }
       })
     }
   }, [excalidrawAPI])
 
   const updateOldElementsMap = (diffElements: ExcalidrawElement[]) => {
-    diffElements.forEach((element: ExcalidrawElement) =>
-      oldElementsMap.set(element.id, element.version),
-    )
+    setOldElementsMap((prevState) => {
+      const newState = prevState
+      diffElements.forEach((element: ExcalidrawElement) =>
+        newState.set(element.id, element.version),
+      )
+      return newState
+    })
   }
 
   const onChange = (elements: readonly ExcalidrawElement[], files: BinaryFiles) => {
