@@ -4,6 +4,7 @@ import { SetStateAction, useEffect, useState } from 'react'
 import { useUserContext } from '../../providers/firebaseUserProvider'
 import BoardTable, { BoardEntity } from './components/boardTable/boardTable'
 import { db } from '../../config/firebase'
+import NewBoardForm from './components/newBoardForm/newBoardForm'
 
 const BoardsPage = () => {
   const { user } = useUserContext()
@@ -33,8 +34,12 @@ const BoardsPage = () => {
 
   return (
     <Grid container justifyContent={'center'} pt={10}>
-      <Grid item xs={10} md={8}>
-        {user && <BoardTable user={user} boards={boards} />}
+      <Grid item xs={10} md={8} display='flex' justifyContent={'center'}>
+        {boards.length && user ? (
+          <BoardTable user={user} boards={boards} />
+        ) : (
+          <NewBoardForm size={'large'} />
+        )}
       </Grid>
     </Grid>
   )

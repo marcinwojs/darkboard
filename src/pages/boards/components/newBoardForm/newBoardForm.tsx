@@ -1,5 +1,6 @@
 import {
   Button,
+  ButtonProps,
   Checkbox,
   Dialog,
   DialogActions,
@@ -8,13 +9,14 @@ import {
   FormControlLabel,
   Stack,
   TextField,
-  Typography,
 } from '@mui/material'
 import { FormEvent, useState } from 'react'
 import useCreateBoard from '../../../../hooks/useCreateBoard'
 import { useNavigate } from 'react-router-dom'
+import AddIcon from '@mui/icons-material/Add'
 
 type Props = {
+  size?: ButtonProps['size']
   onSuccess?: () => void
 }
 
@@ -24,7 +26,7 @@ const initialFormState = {
   privateBoard: false,
 }
 
-const NewBoardForm = ({ onSuccess }: Props) => {
+const NewBoardForm = ({ size, onSuccess }: Props) => {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [formState, setFormState] = useState(initialFormState)
@@ -48,8 +50,8 @@ const NewBoardForm = ({ onSuccess }: Props) => {
 
   return (
     <div>
-      <Button variant='contained' onClick={handleClickOpen} size={'small'}>
-        <Typography>New Board</Typography>
+      <Button size={size} variant='contained' onClick={handleClickOpen} startIcon={<AddIcon />}>
+        Create Board
       </Button>
       <Dialog open={open} onClose={handleClose}>
         <form onSubmit={onSubmit}>
