@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Box, Stack, useTheme } from '@mui/material'
-import { Excalidraw } from '@excalidraw/excalidraw'
+import { Excalidraw, WelcomeScreen } from '@excalidraw/excalidraw'
 import {
   BinaryFiles,
   ExcalidrawImperativeAPI,
@@ -22,6 +22,7 @@ import useBoardUpdates from '../../../../hooks/useBoardUpdates'
 import { BoardEntity } from '../../../boards/components/boardTable/boardTable'
 import CustomMainMenu from './customMainMenu'
 import ViewModeToggle from '../viewModeToggle/viewModeToggle'
+import Logo from '../../../../layout/logo'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)
@@ -151,6 +152,23 @@ const ExcalidrawBoard = ({
         )}
       >
         <CustomMainMenu boardName={boardData.boardName} />
+        <WelcomeScreen>
+          <WelcomeScreen.Hints.MenuHint>Menu hint</WelcomeScreen.Hints.MenuHint>
+          <WelcomeScreen.Hints.HelpHint>Help hint</WelcomeScreen.Hints.HelpHint>
+          <WelcomeScreen.Hints.ToolbarHint>Toolbar hint</WelcomeScreen.Hints.ToolbarHint>
+          <WelcomeScreen.Center>
+            <WelcomeScreen.Center.Logo>
+              <Logo sx={{}} />
+            </WelcomeScreen.Center.Logo>
+            <WelcomeScreen.Center.Heading>Welcome Screen Heading!</WelcomeScreen.Center.Heading>
+            <WelcomeScreen.Center.Menu>
+              <WelcomeScreen.Center.MenuItemLink href={'/'}>Home</WelcomeScreen.Center.MenuItemLink>
+              <WelcomeScreen.Center.MenuItemLink href={'/boards'}>
+                Boards
+              </WelcomeScreen.Center.MenuItemLink>
+            </WelcomeScreen.Center.Menu>
+          </WelcomeScreen.Center>
+        </WelcomeScreen>
       </Excalidraw>
     </Box>
   )
