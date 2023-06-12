@@ -16,7 +16,7 @@ const CustomMainMenu = ({ boardName }: Props) => {
         </Typography>
       </Stack>
       <MainMenu.Separator />
-      <MainMenu.DefaultItems.SaveToActiveFile />
+      <MainMenu.DefaultItems.Export />
       <MainMenu.DefaultItems.SaveAsImage />
       <MainMenu.DefaultItems.Help />
       <MainMenu.DefaultItems.ClearCanvas />

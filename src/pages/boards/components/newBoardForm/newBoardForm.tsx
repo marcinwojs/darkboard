@@ -6,7 +6,11 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   FormControlLabel,
+  FormLabel,
+  Radio,
+  RadioGroup,
   Stack,
   TextField,
 } from '@mui/material'
@@ -14,6 +18,7 @@ import { FormEvent, useState } from 'react'
 import useCreateBoard from '../../../../hooks/useCreateBoard'
 import { useNavigate } from 'react-router-dom'
 import AddIcon from '@mui/icons-material/Add'
+import { boardTemplates } from '../../../../templates/templates'
 
 type Props = {
   size?: ButtonProps['size']
@@ -24,6 +29,7 @@ const initialFormState = {
   boardName: '',
   description: '',
   privateBoard: false,
+  template: 'blank',
 }
 
 const NewBoardForm = ({ size, onSuccess }: Props) => {
@@ -31,7 +37,7 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
   const [open, setOpen] = useState(false)
   const [formState, setFormState] = useState(initialFormState)
   const { createBoard } = useCreateBoard()
-
+  const boardTemplateList = Object.values(boardTemplates)
   const handleClickOpen = () => setOpen(true)
 
   const handleClose = () => setOpen(false)
@@ -85,6 +91,21 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
                 }
                 label='Private Room'
               />
+
+              <FormControl>
+                <FormLabel>Board Templates</FormLabel>
+                <RadioGroup
+                  defaultValue='blank'
+                  onChange={(event) => setFormState({ ...formState, template: event.target.value })}
+                >
+                  <FormControlLabel value='blank' control={<Radio />} label='Blank' />
+                  {boardTemplateList.map(({ name }) => {
+                    return (
+                      <FormControlLabel key={name} value={name} control={<Radio />} label={name} />
+                    )
+                  })}
+                </RadioGroup>
+              </FormControl>
             </Stack>
           </DialogContent>
           <DialogActions>
