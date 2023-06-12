@@ -30,4 +30,5 @@ module.exports = {
       typescript: {},
     },
   },
+  ignorePatterns: ['**/templates/*.json'],
 }
