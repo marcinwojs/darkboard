@@ -3,12 +3,14 @@ import { useUserContext } from '../providers/firebaseUserProvider'
 import useFirestoreUser from './useFirestoreUser'
 import humanId from 'human-id'
 import { BoardEntity } from '../pages/boards/components/boardTable/boardTable'
-import { convertFromDateObject } from '../shared/utils'
+import { convertFromDateObject, serializeExcToFbase } from '../shared/utils'
+import { BoardsTemplatesKeys, boardTemplates } from '../templates/templates'
 
-type NewBoardProps = {
+export type NewBoardProps = {
   boardName: string
   description: string
   privateBoard: boolean
+  template: BoardsTemplatesKeys
 }
 
 const useCreateBoard = () => {
@@ -17,7 +19,7 @@ const useCreateBoard = () => {
   const instanceId = humanId()
   const { user } = useUserContext()
 
-  const createBoard = ({ boardName, description, privateBoard }: NewBoardProps) => {
+  const createBoard = ({ boardName, description, privateBoard, template }: NewBoardProps) => {
     return new Promise(function (myResolve, myReject) {
       const data: BoardEntity = {
         boardId: instanceId,
@@ -35,7 +37,17 @@ const useCreateBoard = () => {
         id: instanceId,
       })
         .then(() => {
-          addToDoc({ collectionId: 'boardsContent', id: instanceId, data: { elements: [], files: {} } })
+          addToDoc({
+            collectionId: 'boardsContent',
+            id: instanceId,
+            data: {
+              elements:
+                template === BoardsTemplatesKeys.blank
+                  ? []
+                  : serializeExcToFbase(boardTemplates[template].initialElements),
+              files: {},
+            },
+          })
             .then(() => {
               getUserData(user?.id || '')
                 .then((data) => {

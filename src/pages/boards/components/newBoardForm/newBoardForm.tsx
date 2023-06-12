@@ -15,29 +15,29 @@ import {
   TextField,
 } from '@mui/material'
 import { FormEvent, useState } from 'react'
-import useCreateBoard from '../../../../hooks/useCreateBoard'
+import useCreateBoard, { NewBoardProps } from '../../../../hooks/useCreateBoard'
 import { useNavigate } from 'react-router-dom'
 import AddIcon from '@mui/icons-material/Add'
-import { boardTemplates } from '../../../../templates/templates'
+import { BoardsTemplatesKeys, boardTemplates } from '../../../../templates/templates'
 
 type Props = {
   size?: ButtonProps['size']
   onSuccess?: () => void
 }
 
-const initialFormState = {
+const initialFormState: NewBoardProps = {
   boardName: '',
   description: '',
   privateBoard: false,
-  template: 'blank',
+  template: BoardsTemplatesKeys.blank,
 }
 
 const NewBoardForm = ({ size, onSuccess }: Props) => {
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
-  const [formState, setFormState] = useState(initialFormState)
+  const [formState, setFormState] = useState<NewBoardProps>(initialFormState)
   const { createBoard } = useCreateBoard()
-  const boardTemplateList = Object.values(boardTemplates)
+  const boardTemplateList = Object.values(BoardsTemplatesKeys)
   const handleClickOpen = () => setOpen(true)
 
   const handleClose = () => setOpen(false)
@@ -54,6 +54,8 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
     onCreateBoard()
   }
 
+  console.log(formState.template)
+  console.log(boardTemplates[`${formState.template}`])
   return (
     <div>
       <Button size={size} variant='contained' onClick={handleClickOpen} startIcon={<AddIcon />}>
@@ -95,13 +97,22 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
               <FormControl>
                 <FormLabel>Board Templates</FormLabel>
                 <RadioGroup
-                  defaultValue='blank'
-                  onChange={(event) => setFormState({ ...formState, template: event.target.value })}
+                  defaultValue={BoardsTemplatesKeys.blank}
+                  onChange={(event) =>
+                    setFormState({
+                      ...formState,
+                      template: event.target.value as BoardsTemplatesKeys,
+                    })
+                  }
                 >
-                  <FormControlLabel value='blank' control={<Radio />} label='Blank' />
-                  {boardTemplateList.map(({ name }) => {
+                  {boardTemplateList.map((templateKey) => {
                     return (
-                      <FormControlLabel key={name} value={name} control={<Radio />} label={name} />
+                      <FormControlLabel
+                        key={templateKey}
+                        value={templateKey}
+                        control={<Radio />}
+                        label={boardTemplates[templateKey].name}
+                      />
                     )
                   })}
                 </RadioGroup>
