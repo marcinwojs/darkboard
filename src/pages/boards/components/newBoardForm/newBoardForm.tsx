@@ -53,10 +53,10 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
       <Button size={size} variant='contained' onClick={handleClickOpen} startIcon={<AddIcon />}>
         Create Board
       </Button>
-      <Dialog open={open} onClose={handleClose}>
+      <Dialog open={open} onClose={handleClose} fullWidth>
         <form onSubmit={onSubmit}>
           <DialogTitle id='alert-dialog-title'>New Board Form</DialogTitle>
-          <DialogContent sx={{ minWidth: '400px' }}>
+          <DialogContent>
             <Stack py={2} spacing={2} justifyContent={'start'}>
               <TextField
                 required
