@@ -6,10 +6,10 @@ interface Props {
   imgHeight?: string
 }
 
-const Logo = ({ sx, href, imgHeight = '35px' }: Props) => (
+const SmallLogo = ({ sx, href, imgHeight = '35px' }: Props) => (
   <Link href={href || '/'} sx={{ ...sx }}>
-    <img src={'/logo.png'} height={imgHeight} alt={'Darkboard'} />
+    <img src={'/DLogo.png'} height={imgHeight} alt={'Darkboard'} />
   </Link>
 )
 
-export default Logo
+export default SmallLogo

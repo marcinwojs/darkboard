@@ -3,9 +3,10 @@ import {
   Box,
   Button,
   Container,
+  Divider,
+  Drawer,
   IconButton,
   Menu,
-  MenuItem,
   Toolbar,
   Tooltip,
   Typography,
@@ -20,6 +21,8 @@ import Logo from '../logo'
 import DarkModeSwitcher from '../darkModeSwitcher'
 import { isCurrentPage } from '../../shared/utils'
 import { styled } from '@mui/material/styles'
+import UserProfileMenu from './userMenu'
+import SmallLogo from '../smallLogo'
 
 const HighlightTypography = styled(Typography)`
   font-weight: bold;
@@ -29,74 +32,65 @@ const HighlightTypography = styled(Typography)`
 `
 
 const Header = () => {
+  const [openDrawer, setOpenDrawer] = useState(false)
+
+  const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
+    if (
+      event.type === 'keydown' &&
+      ((event as React.KeyboardEvent).key === 'Tab' ||
+        (event as React.KeyboardEvent).key === 'Shift')
+    ) {
+      return
+    }
+
+    setOpenDrawer(open)
+  }
+
   const { pathname } = useLocation()
   const { user } = useUserContext()
-  const { logout } = useAuthorization()
   const navigate = useNavigate()
-  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null)
-  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null)
-
-  const handleOpenNavMenu = (event: MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget)
-  }
-  const handleOpenUserMenu = (event: MouseEvent<HTMLElement>) => {
-    setAnchorElUser(event.currentTarget)
-  }
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null)
-  }
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null)
-  }
 
   const handleNavigate = (path: string) => {
-    handleCloseNavMenu()
     navigate(path)
-  }
-  const onLogout = () => {
-    handleCloseNavMenu()
-    logout().then(() => {
-      navigate('/', { replace: true })
-    })
   }
 
   return (
-    <AppBar position='static' sx={{ height: '70px' }}>
-      <Container maxWidth='xl'>
-        <Toolbar variant='dense' color='white' sx={{ py: 2 }}>
-          <Logo sx={{ display: { xs: 'none', md: 'flex' }, mr: 5 }} />
+    <AppBar position='static'>
+      <Container maxWidth={false} disableGutters>
+        <Toolbar variant='dense' sx={{ height: '70px', justifyContent: 'center' }}>
+          <SmallLogo
+            sx={{
+              display: { md: 'none' },
+              position: 'absolute',
+              height: '35px',
+            }}
+            imgHeight={'35px'}
+          />
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size='large'
               aria-label='account of current user'
               aria-controls='menu-appbar'
               aria-haspopup='true'
-              onClick={handleOpenNavMenu}
+              onClick={toggleDrawer(!openDrawer)}
               color='inherit'
             >
               <MenuIcon />
             </IconButton>
-            <Menu
-              id='menu-appbar'
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{
-                display: { xs: 'block', md: 'none' },
-              }}
-            >
-              <Button onClick={() => handleNavigate('/')} sx={{ display: 'block' }}>
+            <Drawer anchor={'left'} open={openDrawer} onClose={toggleDrawer(false)}>
+              <Logo
+                imgHeight={'20px'}
+                sx={{
+                  m: 1,
+                  flexGrow: 1,
+                }}
+              />
+              <Divider variant={'middle'} sx={{ mb: 1 }} />
+              <Box sx={{ pl: 1 }}>
+                <DarkModeSwitcher />
+              </Box>
+              <Divider variant={'middle'} sx={{ my: 1 }} />
+              <Button onClick={() => handleNavigate('/')} sx={{ display: 'block', pl: 2 }}>
                 <HighlightTypography
                   className={(isCurrentPage('/', pathname) && 'current') || undefined}
                 >
@@ -104,23 +98,26 @@ const Header = () => {
                 </HighlightTypography>
               </Button>
               {user ? (
-                <Button onClick={() => handleNavigate('/boards')} sx={{ display: 'block' }}>
-                  <HighlightTypography
-                    className={(isCurrentPage('/boards', pathname) && 'current') || undefined}
-                  >
-                    Boards
-                  </HighlightTypography>
-                </Button>
+                <>
+                  <Divider variant={'middle'} />
+                  <Button onClick={() => handleNavigate('/boards')} sx={{ display: 'block' }}>
+                    <HighlightTypography
+                      className={(isCurrentPage('/boards', pathname) && 'current') || undefined}
+                    >
+                      Boards
+                    </HighlightTypography>
+                  </Button>
+                </>
               ) : null}
-            </Menu>
+            </Drawer>
           </Box>
           <Logo
             sx={{
               mr: 1,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
+              display: { xs: 'none', md: 'block' },
             }}
           />
+
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             <Button onClick={() => handleNavigate('/')} sx={{ color: 'inherit', display: 'block' }}>
               <HighlightTypography
@@ -143,38 +140,12 @@ const Header = () => {
               </Button>
             ) : null}
           </Box>
-          <DarkModeSwitcher />
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <DarkModeSwitcher />
+          </Box>
           <Box sx={{ flexGrow: 0 }}>
             {user ? (
-              <>
-                <Tooltip title='Open settings'>
-                  <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                    <Avatar alt={user?.firstName} src={user?.photo}>
-                      {user?.photo ? null : user?.firstName[0] || null}
-                    </Avatar>
-                  </IconButton>
-                </Tooltip>
-                <Menu
-                  sx={{ mt: '45px' }}
-                  id='menu-appbar'
-                  anchorEl={anchorElUser}
-                  anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  open={Boolean(anchorElUser)}
-                  onClose={handleCloseUserMenu}
-                >
-                  <MenuItem onClick={onLogout}>
-                    <Typography textAlign='center'>Logout</Typography>
-                  </MenuItem>
-                </Menu>
-              </>
+              <UserProfileMenu user={user} />
             ) : (
               <>
                 <Button
@@ -186,7 +157,7 @@ const Header = () => {
                   Login
                 </Button>
                 <Button
-                  sx={{ ml: 2 }}
+                  sx={{ ml: 2, display: { xs: 'none', md: 'inline-flex' } }}
                   color='inherit'
                   variant='outlined'
                   onClick={() => handleNavigate('/register')}
