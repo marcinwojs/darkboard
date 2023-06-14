@@ -1,13 +1,13 @@
-import { Snackbar } from '@mui/material'
+import { IconButtonProps, Snackbar } from '@mui/material'
 import React, { useState } from 'react'
 import ShareIcon from '@mui/icons-material/Share'
 import TooltipButton from '../../../../shared/components/tooltipButton/tooltipButton'
 
-type Props = {
+type Props = IconButtonProps & {
   id: string
 }
 
-const ShareButton = ({ id }: Props) => {
+const ShareButton = ({ id, ...buttonProps }: Props) => {
   const [open, setOpen] = useState(false)
   const shareLink = `${window.location.origin}/board/${id}`
 
@@ -18,8 +18,8 @@ const ShareButton = ({ id }: Props) => {
 
   return (
     <>
-      <TooltipButton variant={'outlined'} tipText={'Copy board URL'} onClick={handleClick}>
-        <ShareIcon />
+      <TooltipButton tipText={'Copy board URL'} {...buttonProps} onClick={handleClick}>
+        <ShareIcon fontSize={'inherit'} />
       </TooltipButton>
       <Snackbar
         open={open}
