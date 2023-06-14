@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Box, Stack, useTheme } from '@mui/material'
+import { Box, useTheme } from '@mui/material'
 import { Excalidraw, WelcomeScreen } from '@excalidraw/excalidraw'
 import {
   BinaryFiles,
@@ -16,13 +16,12 @@ import {
   getDiffElements,
   serializeExcToFbase,
 } from '../../../../shared/utils'
-import ShareButton from '../shareButton/shareButton'
 import { UserEntity } from '../../../../hooks/useFirestoreUser'
 import useBoardUpdates from '../../../../hooks/useBoardUpdates'
 import { BoardEntity } from '../../../boards/components/boardTable/boardTable'
 import CustomMainMenu from './customMainMenu'
-import ViewModeToggle from '../viewModeToggle/viewModeToggle'
 import Logo from '../../../../layout/logo'
+import AdditionalButtons from './additionalButtons'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)
@@ -144,12 +143,7 @@ const ExcalidrawBoard = ({
         }}
         onChange={(elements, appState, files) => onChange(elements, files)}
         onPointerUpdate={(payload) => updatePointerPosition(user, payload)}
-        renderTopRightUI={() => (
-          <Stack direction={'row'} spacing={1.5}>
-            <ViewModeToggle />
-            <ShareButton id={instanceId} />
-          </Stack>
-        )}
+        renderTopRightUI={() => <AdditionalButtons instanceId={instanceId} />}
       >
         <CustomMainMenu boardName={boardData.boardName} />
         <WelcomeScreen>

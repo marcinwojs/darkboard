@@ -1,9 +1,19 @@
-import { ToggleButton, ToggleButtonGroup, Tooltip } from '@mui/material'
+import {
+  ToggleButton,
+  ToggleButtonGroup,
+  ToggleButtonGroupProps,
+  ToggleButtonProps,
+  Tooltip,
+} from '@mui/material'
 import { MouseEvent, memo } from 'react'
 import { WebAsset, CropFree, CropDin } from '@mui/icons-material'
 import { HeaderMode, useAppLayoutContext } from '../../../../providers/appLayoutProvider'
 
-const ViewModeToggle = () => {
+type Props = ToggleButtonGroupProps & {
+  toggleButtonProps?: Partial<ToggleButtonProps>
+}
+
+const ViewModeToggle = ({ toggleButtonProps, ...groupProps }: Props) => {
   const { headerMode, changeHeaderMode } = useAppLayoutContext()
 
   const handleChange = (event: MouseEvent<HTMLElement>, mode: HeaderMode) => {
@@ -15,26 +25,37 @@ const ViewModeToggle = () => {
   const fullscreenRequest = () => document.documentElement.requestFullscreen()
 
   return (
-    <ToggleButtonGroup value={headerMode} exclusive onChange={handleChange}>
+    <ToggleButtonGroup {...groupProps} value={headerMode} exclusive onChange={handleChange}>
       <Tooltip title={'Show header'}>
-        <ToggleButton sx={{ py: 0 }} value='regular' selected={headerMode === 'regular'}>
-          <WebAsset />
+        <ToggleButton
+          sx={{ py: 0 }}
+          selected={headerMode === 'regular'}
+          {...toggleButtonProps}
+          value='regular'
+        >
+          <WebAsset fontSize={'inherit'} />
         </ToggleButton>
       </Tooltip>
       <Tooltip title={'Hide header'}>
-        <ToggleButton sx={{ py: 0 }} value='focus' selected={headerMode === 'focus'}>
-          <CropDin />
+        <ToggleButton
+          sx={{ py: 0 }}
+          selected={headerMode === 'focus'}
+          {...toggleButtonProps}
+          value='focus'
+        >
+          <CropDin fontSize={'inherit'} />
         </ToggleButton>
       </Tooltip>
       <Tooltip title={'Fullscreen'} sx={{ width: '100%' }}>
         <ToggleButton
-          id={'fullscreenBtn'}
           sx={{ py: 0 }}
-          value='fullscreen'
+          id={'fullscreenBtn'}
           selected={headerMode === 'fullscreen'}
           onClick={fullscreenRequest}
+          {...toggleButtonProps}
+          value='fullscreen'
         >
-          <CropFree />
+          <CropFree fontSize={'inherit'} />
         </ToggleButton>
       </Tooltip>
     </ToggleButtonGroup>

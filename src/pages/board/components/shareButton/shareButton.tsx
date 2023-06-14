@@ -25,6 +25,7 @@ const ShareButton = ({ id, ...buttonProps }: Props) => {
         open={open}
         onClose={() => setOpen(false)}
         autoHideDuration={2000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         message='Copied invite board link to clipboard'
       />
     </>
