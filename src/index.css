@@ -12,5 +12,5 @@ code {
 }
 
 .firebase-emulator-warning {
-  opacity: 25%;
+  display: none;
 }

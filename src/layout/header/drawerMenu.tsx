@@ -31,15 +31,7 @@ const DrawerMenu = ({ logged }: Props) => {
     navigate(path)
   }
 
-  const toggleDrawer = (open: boolean) => (event: React.KeyboardEvent | React.MouseEvent) => {
-    if (
-      event.type === 'keydown' &&
-      ((event as React.KeyboardEvent).key === 'Tab' ||
-        (event as React.KeyboardEvent).key === 'Shift')
-    ) {
-      return
-    }
-
+  const toggleDrawer = (open: boolean) => () => {
     setOpenDrawer(open)
   }
 
@@ -47,8 +39,8 @@ const DrawerMenu = ({ logged }: Props) => {
     <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
       <IconButton
         size='large'
-        aria-label='account of current user'
-        aria-controls='menu-appbar'
+        aria-label='mobile control menu'
+        aria-controls='menu-toggler'
         aria-haspopup='true'
         onClick={toggleDrawer(!openDrawer)}
         color='inherit'
