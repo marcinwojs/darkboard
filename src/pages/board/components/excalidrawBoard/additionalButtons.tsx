@@ -33,7 +33,6 @@ const AdditionalButtons = ({ instanceId }: Props) => {
               }}
             />
             <ShareButton
-              variant={'text'}
               id={instanceId}
               sx={{ minWidth: '36px', px: 0, fontSize: '16px' }}
             />
