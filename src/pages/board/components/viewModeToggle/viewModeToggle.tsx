@@ -25,7 +25,7 @@ const ViewModeToggle = ({ toggleButtonProps, ...groupProps }: Props) => {
   const fullscreenRequest = () => document.documentElement.requestFullscreen()
 
   return (
-    <ToggleButtonGroup {...groupProps} value={headerMode} exclusive onChange={handleChange}>
+    <ToggleButtonGroup {...groupProps} sx={{overflow: 'hidden', ...groupProps.sx}} value={headerMode} exclusive onChange={handleChange}>
       <Tooltip title={'Show header'}>
         <ToggleButton
           sx={{ py: 0 }}

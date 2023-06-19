@@ -3,6 +3,7 @@ import ShareButton from '../shareButton/shareButton'
 import { Stack } from '@mui/material'
 import { useDevice } from '@excalidraw/excalidraw'
 import InjectBefore from '../../../../shared/helpers/injectBefore'
+import CustomToolsIsland from './customTools/customToolsIsland'
 
 type Props = {
   instanceId: string
@@ -32,10 +33,8 @@ const AdditionalButtons = ({ instanceId }: Props) => {
                 size: 'small',
               }}
             />
-            <ShareButton
-              id={instanceId}
-              sx={{ minWidth: '36px', px: 0, fontSize: '16px' }}
-            />
+            <ShareButton id={instanceId} sx={{ minWidth: '36px', px: 0, fontSize: '16px' }} />
+            <CustomToolsIsland injected />
           </Stack>,
           toInject,
         )}
@@ -47,6 +46,7 @@ const AdditionalButtons = ({ instanceId }: Props) => {
     <Stack direction={'row'} spacing={1.5}>
       <ViewModeToggle toggleButtonProps={{ sx: { height: '36px', fontSize: '24px' } }} />
       <ShareButton id={instanceId} sx={{ height: '36px', fontSize: '24px' }} />
+      <CustomToolsIsland />
     </Stack>
   )
 }

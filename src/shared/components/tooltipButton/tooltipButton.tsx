@@ -1,10 +1,10 @@
 import { IconButton, IconButtonProps, Tooltip } from '@mui/material'
 
-type Props = IconButtonProps & {
+export type TooltipButtonProps = IconButtonProps & {
   tipText: string
 }
 
-const TooltipButton = ({ children, tipText, ...btnProps }: Props) => {
+const TooltipButton = ({ children, tipText, ...btnProps }: TooltipButtonProps) => {
   return (
     <Tooltip title={tipText}>
       <IconButton {...btnProps}>{children} </IconButton>

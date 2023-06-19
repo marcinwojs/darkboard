@@ -14,3 +14,6 @@ code {
 .firebase-emulator-warning {
   display: none;
 }
+.mobile-misc-tools-container{
+  overflow: visible !important;
+}

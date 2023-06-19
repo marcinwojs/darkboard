@@ -69,8 +69,12 @@ const ExcalidrawBoard = ({
   useEffect(() => {
     if (excalidrawAPI) {
       handleUpdatePointerPosition(user.id, (data) => {
+        const map = excalidrawAPI.getAppState().collaborators
+        Object.values(data).map((us) => {
+          if (us.id) map.set(us.id, us)
+        })
         excalidrawAPI?.updateScene({
-          collaborators: new Map(Object.entries(data)),
+          collaborators: map,
         })
       })
 
@@ -129,6 +133,7 @@ const ExcalidrawBoard = ({
     }
   }
 
+  console.log('bbb')
   return (
     <Box width={'100%'} height={'inherit'}>
       <Excalidraw
@@ -141,8 +146,15 @@ const ExcalidrawBoard = ({
           files,
           libraryItems,
         }}
-        onChange={(elements, appState, files) => onChange(elements, files)}
-        onPointerUpdate={(payload) => updatePointerPosition(user, payload)}
+        onChange={(elements, appState, files) => {
+          onChange(elements, files)
+        }}
+        onPointerUpdate={(payload) => {
+          // console.log(excalidrawAPI && excalidrawAPI.getAppState().collaborators)
+
+          updatePointerPosition(user, payload)
+        }}
+        // renderTopRightUI={() => <StickyNote  />}
         renderTopRightUI={() => <AdditionalButtons instanceId={instanceId} />}
       >
         <CustomMainMenu boardName={boardData.boardName} />

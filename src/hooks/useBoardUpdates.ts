@@ -7,6 +7,7 @@ import { SerializedExcalidrawElement } from '../pages/board/components/excalidra
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
 
 type UpdatePointerPositionPayload = {
+  id?: string
   pointer: {
     x: number
     y: number
