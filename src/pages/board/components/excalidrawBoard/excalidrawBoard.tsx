@@ -133,7 +133,6 @@ const ExcalidrawBoard = ({
     }
   }
 
-  console.log('bbb')
   return (
     <Box width={'100%'} height={'inherit'}>
       <Excalidraw
@@ -149,12 +148,7 @@ const ExcalidrawBoard = ({
         onChange={(elements, appState, files) => {
           onChange(elements, files)
         }}
-        onPointerUpdate={(payload) => {
-          // console.log(excalidrawAPI && excalidrawAPI.getAppState().collaborators)
-
-          updatePointerPosition(user, payload)
-        }}
-        // renderTopRightUI={() => <StickyNotes  />}
+        onPointerUpdate={(payload) => updatePointerPosition(user, payload)}
         renderTopRightUI={() => <AdditionalButtons instanceId={instanceId} />}
       >
         <CustomMainMenu boardName={boardData.boardName} />

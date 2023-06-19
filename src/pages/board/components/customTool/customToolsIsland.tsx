@@ -3,8 +3,9 @@ import React, { useState, ReactNode } from 'react'
 import TooltipButton, {
   TooltipButtonProps,
 } from '../../../../shared/components/tooltipButton/tooltipButton'
+import { flushSync } from 'react-dom'
 
-type Props1 = TooltipButtonProps & {
+type Props = TooltipButtonProps & {
   containerProps?: BoxProps
   menuContent: ReactNode
   children: ReactNode
@@ -16,20 +17,35 @@ const CustomToolsIsland = ({
   containerProps,
   tipText,
   ...buttonProps
-}: Props1) => {
+}: Props) => {
   const [showContainer, setShowContainer] = useState(false)
 
-  const handleButtonClick = () => {
-    setShowContainer(!showContainer)
+  const handleMove = (show: boolean) => {
+    if ('startViewTransition' in document) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      // @ts-ignore
+      document.startViewTransition(() => {
+        flushSync(() => {
+          setShowContainer(show)
+        })
+      })
+    } else {
+      setShowContainer(show)
+    }
   }
 
   return (
     <Box style={{ position: 'relative' }}>
-      <TooltipButton tipText={tipText} size={'small'} {...buttonProps} onClick={handleButtonClick}>
+      <TooltipButton
+        tipText={tipText}
+        mobile
+        {...buttonProps}
+        onClick={() => handleMove(!showContainer)}
+      >
         {children}
       </TooltipButton>
-      {showContainer && (
-        <ClickAwayListener onClickAway={() => setShowContainer(false)}>
+      {showContainer ? (
+        <ClickAwayListener onClickAway={() => handleMove(false)}>
           <Box
             sx={{
               backgroundColor: 'var(--sidebar-bg-color)',
@@ -40,14 +56,14 @@ const CustomToolsIsland = ({
               top: '50%',
               boxShadow: 'var(--shadow-island)',
               transform: 'translateY(-50%)',
-              padding: '10px',
+              padding: 2,
             }}
             {...containerProps}
           >
             {menuContent}
           </Box>
         </ClickAwayListener>
-      )}
+      ) : null}
     </Box>
   )
 }

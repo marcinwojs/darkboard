@@ -5,9 +5,10 @@ import TooltipButton from '../../../../shared/components/tooltipButton/tooltipBu
 
 type Props = IconButtonProps & {
   id: string
+  mobile?: boolean
 }
 
-const ShareButton = ({ id, ...buttonProps }: Props) => {
+const ShareButton = ({ id, mobile = false, ...buttonProps }: Props) => {
   const [open, setOpen] = useState(false)
   const shareLink = `${window.location.origin}/board/${id}`
 
@@ -18,7 +19,12 @@ const ShareButton = ({ id, ...buttonProps }: Props) => {
 
   return (
     <>
-      <TooltipButton tipText={'Copy board URL'} {...buttonProps} onClick={handleClick}>
+      <TooltipButton
+        mobile={mobile}
+        tipText={'Copy board URL'}
+        {...buttonProps}
+        onClick={handleClick}
+      >
         <ShareIcon fontSize={'inherit'} />
       </TooltipButton>
       <Snackbar

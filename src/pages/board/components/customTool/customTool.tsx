@@ -12,7 +12,7 @@ const CustomTool = (libraryItem: LibraryItem) => {
       return
     }
 
-    ;(async () => {
+    (async () => {
       if (!libraryItem.elements) {
         return
       }
@@ -34,22 +34,21 @@ const CustomTool = (libraryItem: LibraryItem) => {
     }
   }, [libraryItem.elements])
 
+  const onDragStart = (event: React.DragEvent<HTMLDivElement>) => {
+    if (!libraryItem.id) {
+      event.preventDefault()
+      return
+    }
+    event.dataTransfer.setData(MIME_TYPES.excalidrawlib, serializeLibraryAsJSON([libraryItem]))
+  }
+
   return (
     <Box>
       <Box
         sx={{ cursor: 'grab' }}
         ref={ref}
         draggable={!!libraryItem.elements}
-        onDragStart={(event) => {
-          if (!libraryItem.id) {
-            event.preventDefault()
-            return
-          }
-          event.dataTransfer.setData(
-            MIME_TYPES.excalidrawlib,
-            serializeLibraryAsJSON([libraryItem]),
-          )
-        }}
+        onDragStart={onDragStart}
       />
     </Box>
   )
