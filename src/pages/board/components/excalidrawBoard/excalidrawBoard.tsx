@@ -154,7 +154,7 @@ const ExcalidrawBoard = ({
 
           updatePointerPosition(user, payload)
         }}
-        // renderTopRightUI={() => <StickyNote  />}
+        // renderTopRightUI={() => <StickyNotes  />}
         renderTopRightUI={() => <AdditionalButtons instanceId={instanceId} />}
       >
         <CustomMainMenu boardName={boardData.boardName} />

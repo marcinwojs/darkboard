@@ -1,21 +1,11 @@
-import { LibraryItem } from '@excalidraw/excalidraw/types/types'
 import { useEffect, useRef } from 'react'
-import { exportToSvg } from '@excalidraw/excalidraw'
+import { exportToSvg, MIME_TYPES, serializeLibraryAsJSON } from '@excalidraw/excalidraw'
+import { LibraryItem } from '@excalidraw/excalidraw/types/types'
+import { Box } from '@mui/material'
 
-type Props = {
-  id: LibraryItem['id'] | /** for pending item */ null
-  svgStyle?: string
-  elements?: LibraryItem['elements']
-  onDrag: (id: string, event: React.DragEvent) => void
-}
-
-export const CustomTool = ({
-  id,
-  elements,
-  onDrag,
-  svgStyle = 'width: 50px; height: 50px',
-}: Props) => {
+const CustomTool = (libraryItem: LibraryItem) => {
   const ref = useRef<HTMLDivElement | null>(null)
+
   useEffect(() => {
     const node = ref.current
     if (!node) {
@@ -23,40 +13,45 @@ export const CustomTool = ({
     }
 
     ;(async () => {
-      if (!elements) {
+      if (!libraryItem.elements) {
         return
       }
       const svg = await exportToSvg({
-        elements,
+        elements: libraryItem.elements,
         appState: {
           exportBackground: false,
+          viewBackgroundColor: '#fff',
         },
         files: null,
       })
       svg.querySelector('.style-fonts')?.remove()
-      svg.setAttribute('style', svgStyle)
+      svg.setAttribute('style', 'width: 50px; height: 50px')
       node.innerHTML = svg.outerHTML
     })()
 
     return () => {
       node.innerHTML = ''
     }
-  }, [elements])
+  }, [libraryItem.elements])
 
   return (
-    <div>
-      <div
+    <Box>
+      <Box
+        sx={{ cursor: 'grab' }}
         ref={ref}
-        draggable={!!elements}
+        draggable={!!libraryItem.elements}
         onDragStart={(event) => {
-          if (!id) {
+          if (!libraryItem.id) {
             event.preventDefault()
             return
           }
-          onDrag(id, event)
+          event.dataTransfer.setData(
+            MIME_TYPES.excalidrawlib,
+            serializeLibraryAsJSON([libraryItem]),
+          )
         }}
       />
-    </div>
+    </Box>
   )
 }
 

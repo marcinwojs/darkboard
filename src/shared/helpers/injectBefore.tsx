@@ -1,11 +1,18 @@
 import { ReactNode, ReactPortal, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
-export const InjectBefore = (component: ReactNode, container: Element): ReactPortal => {
+export const InjectBefore = ({
+  component,
+  container,
+}: {
+  component: ReactNode
+  container: Element
+}): ReactPortal => {
   const portalContainer = document.createElement('div')
 
   useEffect(() => {
-    container.prepend(portalContainer)
+    container.insertBefore(portalContainer, container.firstChild)
+
     return () => {
       container.removeChild(portalContainer)
     }
