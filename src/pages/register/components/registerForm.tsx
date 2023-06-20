@@ -4,6 +4,7 @@ import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
 import VisibilityIcon from '@mui/icons-material/Visibility'
 import { Stack, IconButton, InputAdornment, TextField, Button, Typography } from '@mui/material'
 import useAuthorization from '../../../hooks/useAuthorization'
+import { handleError } from '../../../config/errorsMessages'
 
 const RegisterForm = () => {
   const navigate = useNavigate()
@@ -27,10 +28,11 @@ const RegisterForm = () => {
           navigate('/boards', { replace: true })
         })
         .catch((error) => {
-          setError(error.code)
+          console.error(error)
+          setError(handleError(error.code))
         })
     } else {
-      setError('Password arent the same')
+      setError(handleError('password-arent-the-same'))
     }
   }
 

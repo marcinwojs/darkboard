@@ -13,13 +13,15 @@ import {
   RadioGroup,
   Stack,
   TextField,
+  Typography,
 } from '@mui/material'
-import { FormEvent, useState } from 'react'
+import { FormEvent, useState, useEffect } from 'react'
 import useCreateBoard, { NewBoardProps } from '../../../../hooks/useCreateBoard'
 import { useNavigate } from 'react-router-dom'
 import AddIcon from '@mui/icons-material/Add'
 import { BoardsTemplatesKeys, boardTemplates } from '../../../../templates/templates'
 import { useUserContext } from '../../../../providers/firebaseUserProvider'
+import { handleError } from '../../../../config/errorsMessages'
 
 type Props = {
   size?: ButtonProps['size']
@@ -36,10 +38,16 @@ const initialFormState: NewBoardProps = {
 const NewBoardForm = ({ size, onSuccess }: Props) => {
   const { user } = useUserContext()
   const navigate = useNavigate()
+  const [error, setError] = useState('')
   const [open, setOpen] = useState(false)
   const [formState, setFormState] = useState<NewBoardProps>(initialFormState)
   const { createBoard } = useCreateBoard()
   const boardTemplateList = Object.values(BoardsTemplatesKeys)
+
+  useEffect(() => {
+    setError('')
+  }, [formState])
+
   const handleClickOpen = () => {
     if (!user) {
       return navigate('/login')
@@ -51,10 +59,15 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
   const handleClose = () => setOpen(false)
 
   const onCreateBoard = () => {
-    createBoard(formState).then((id) => {
-      onSuccess && onSuccess()
-      navigate(`/board/${id}`)
-    })
+    createBoard(formState)
+      .then((id) => {
+        onSuccess && onSuccess()
+        navigate(`/board/${id}`)
+      })
+      .catch((error) => {
+        console.error(error)
+        setError(handleError(error.code))
+      })
   }
 
   const onSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -126,6 +139,11 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
             </Stack>
           </DialogContent>
           <DialogActions>
+            {error ? (
+              <Typography color={'red'} mr={'auto'} px={2}>
+                {error}
+              </Typography>
+            ) : null}
             <Button variant={'contained'} onClick={handleClose}>
               Cancel
             </Button>

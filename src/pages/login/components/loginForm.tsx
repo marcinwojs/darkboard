@@ -4,6 +4,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility'
 import { Stack, IconButton, InputAdornment, TextField, Button, Typography } from '@mui/material'
 import UseAuthorization from '../../../hooks/useAuthorization'
 import { useNavigate } from 'react-router-dom'
+import { handleError } from '../../../config/errorsMessages'
 
 const LoginForm = () => {
   const navigate = useNavigate()
@@ -21,7 +22,8 @@ const LoginForm = () => {
         navigate('/boards', { replace: true })
       })
       .catch((error) => {
-        setError(error.code)
+        console.error(error)
+        setError(handleError(error.code))
       })
   }
 
