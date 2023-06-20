@@ -22,8 +22,7 @@ const LoginForm = () => {
         navigate('/boards', { replace: true })
       })
       .catch((error) => {
-        console.error(error)
-        setError(handleError(error.code))
+        setError(handleError(error.code, error))
       })
   }
 

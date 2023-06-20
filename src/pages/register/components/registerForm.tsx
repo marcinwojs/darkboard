@@ -28,11 +28,10 @@ const RegisterForm = () => {
           navigate('/boards', { replace: true })
         })
         .catch((error) => {
-          console.error(error)
-          setError(handleError(error.code))
+          setError(handleError(error.code, error))
         })
     } else {
-      setError(handleError('password-arent-the-same'))
+      setError(handleError('password-not-the-same'))
     }
   }
 

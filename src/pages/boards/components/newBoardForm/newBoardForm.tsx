@@ -65,8 +65,7 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
         navigate(`/board/${id}`)
       })
       .catch((error) => {
-        console.error(error)
-        setError(handleError(error.code))
+        setError(handleError(error.code, error))
       })
   }
 

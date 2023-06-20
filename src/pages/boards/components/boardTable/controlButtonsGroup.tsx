@@ -1,4 +1,4 @@
-import { Stack } from '@mui/material'
+import { Snackbar, Stack } from '@mui/material'
 import TooltipButton from '../../../../shared/components/tooltipButton/tooltipButton'
 import ShareButton from '../../../board/components/shareButton/shareButton'
 import { DeleteForever, Logout, Login } from '@mui/icons-material'
@@ -6,6 +6,8 @@ import useRemoveBoard from '../../../../hooks/useRemoveBoard'
 import useBoardRoom from '../../../../hooks/useBoardRoom'
 import useConfirm from '../../../../shared/hooks/useConfirm'
 import { useNavigate } from 'react-router-dom'
+import React, { useState } from 'react'
+import { handleError } from '../../../../config/errorsMessages'
 
 type Props = {
   creatorId: string
@@ -14,6 +16,7 @@ type Props = {
 }
 const ControlButtonsGroup = ({ userId, creatorId, boardId }: Props) => {
   const navigate = useNavigate()
+  const [error, setError] = useState('')
   const confirmRemove = useConfirm({
     title: 'Delete board',
     body: 'Are you sure you want to delete this board? This action will permanently remove the board you created and remove it from all participants lists.',
@@ -40,30 +43,47 @@ const ControlButtonsGroup = ({ userId, creatorId, boardId }: Props) => {
   const onRemoveBoard = async (id: string) => {
     const confirm = await confirmRemove()
 
-    if (userId && confirm) removeBoard(userId, id)
+    if (userId && confirm) {
+      removeBoard(userId, id).catch((error) => {
+        setError(handleError(error.code, error))
+      })
+    }
   }
   const onLeaveBoard = async (id: string) => {
     const confirm = await confirmLeave()
 
-    if (userId && confirm) leaveRoom(id, userId)
+    if (userId && confirm) {
+      leaveRoom(id, userId).catch((error) => {
+        setError(handleError(error.code, error))
+      })
+    }
   }
 
   return (
-    <Stack direction={'row'}>
-      <TooltipButton tipText={'Go to board'} onClick={() => navigateToBoard(boardId)}>
-        <Login fontSize={'small'} />
-      </TooltipButton>
-      <ShareButton size={'small'} id={boardId} />
-      {creatorId === userId ? (
-        <TooltipButton tipText={'Delete Board'} onClick={() => onRemoveBoard(boardId)}>
-          <DeleteForever fontSize={'small'} />
+    <>
+      <Stack direction={'row'}>
+        <TooltipButton tipText={'Go to board'} onClick={() => navigateToBoard(boardId)}>
+          <Login fontSize={'small'} />
         </TooltipButton>
-      ) : (
-        <TooltipButton tipText={'Remove me from Board'} onClick={() => onLeaveBoard(boardId)}>
-          <Logout fontSize={'small'} />
-        </TooltipButton>
-      )}
-    </Stack>
+        <ShareButton size={'small'} id={boardId} />
+        {creatorId === userId ? (
+          <TooltipButton tipText={'Delete Board'} onClick={() => onRemoveBoard(boardId)}>
+            <DeleteForever fontSize={'small'} />
+          </TooltipButton>
+        ) : (
+          <TooltipButton tipText={'Remove me from Board'} onClick={() => onLeaveBoard(boardId)}>
+            <Logout fontSize={'small'} />
+          </TooltipButton>
+        )}
+      </Stack>
+      <Snackbar
+        open={Boolean(error)}
+        onClose={() => setError('')}
+        autoHideDuration={2000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        message={error}
+      />
+    </>
   )
 }
 

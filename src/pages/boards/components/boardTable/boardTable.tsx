@@ -56,7 +56,7 @@ const BoardTable = ({ boards, user }: Props) => {
           mb: 1,
         }}
       >
-        <Table size={'small'} >
+        <Table size={'small'}>
           <TableHead>
             <TableRow>
               <CenteredCell>Name</CenteredCell>
