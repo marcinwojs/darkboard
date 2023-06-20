@@ -19,6 +19,7 @@ import useCreateBoard, { NewBoardProps } from '../../../../hooks/useCreateBoard'
 import { useNavigate } from 'react-router-dom'
 import AddIcon from '@mui/icons-material/Add'
 import { BoardsTemplatesKeys, boardTemplates } from '../../../../templates/templates'
+import { useUserContext } from '../../../../providers/firebaseUserProvider'
 
 type Props = {
   size?: ButtonProps['size']
@@ -33,12 +34,19 @@ const initialFormState: NewBoardProps = {
 }
 
 const NewBoardForm = ({ size, onSuccess }: Props) => {
+  const { user } = useUserContext()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [formState, setFormState] = useState<NewBoardProps>(initialFormState)
   const { createBoard } = useCreateBoard()
   const boardTemplateList = Object.values(BoardsTemplatesKeys)
-  const handleClickOpen = () => setOpen(true)
+  const handleClickOpen = () => {
+    if (!user) {
+      return navigate('/login')
+    }
+
+    setOpen(true)
+  }
 
   const handleClose = () => setOpen(false)
 
@@ -54,8 +62,6 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
     onCreateBoard()
   }
 
-  console.log(formState.template)
-  console.log(boardTemplates[`${formState.template}`])
   return (
     <div>
       <Button size={size} variant='contained' onClick={handleClickOpen} startIcon={<AddIcon />}>

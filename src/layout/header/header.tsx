@@ -38,7 +38,7 @@ const Header = () => {
             imgHeight={'35px'}
           />
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <DrawerMenu logged={!!user} />
+            <DrawerMenu />
           </Box>
           <Logo
             sx={{
@@ -54,18 +54,16 @@ const Header = () => {
                 Home
               </HighlightTypography>
             </Button>
-            {user ? (
-              <Button
-                onClick={() => handleNavigate('/boards')}
-                sx={{ color: 'inherit', display: 'block' }}
+            <Button
+              onClick={() => handleNavigate('/boards')}
+              sx={{ color: 'inherit', display: 'block' }}
+            >
+              <HighlightTypography
+                className={(isCurrentPage('/boards', pathname) && 'current') || undefined}
               >
-                <HighlightTypography
-                  className={(isCurrentPage('/boards', pathname) && 'current') || undefined}
-                >
-                  Boards
-                </HighlightTypography>
-              </Button>
-            ) : null}
+                Boards
+              </HighlightTypography>
+            </Button>
           </Box>
           <Box sx={{ display: { xs: 'none', md: 'block' }, px: 1 }}>
             <DarkModeSwitcher />

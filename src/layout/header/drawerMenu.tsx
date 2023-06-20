@@ -18,11 +18,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard'
 import MenuIcon from '@mui/icons-material/Menu'
 import { useState } from 'react'
 
-type Props = {
-  logged: boolean
-}
-
-const DrawerMenu = ({ logged }: Props) => {
+const DrawerMenu = () => {
   const [openDrawer, setOpenDrawer] = useState(false)
   const { pathname } = useLocation()
   const navigate = useNavigate()
@@ -69,19 +65,17 @@ const DrawerMenu = ({ logged }: Props) => {
               <ListItemText primary={'Home'} />
             </ListItemButton>
           </ListItem>
-          {logged ? (
-            <ListItem disablePadding>
-              <ListItemButton
-                selected={isCurrentPage('/boards', pathname)}
-                onClick={() => handleNavigate('/boards')}
-              >
-                <ListItemIcon>
-                  <DashboardIcon />
-                </ListItemIcon>
-                <ListItemText primary={'Boards'} />
-              </ListItemButton>
-            </ListItem>
-          ) : null}
+          <ListItem disablePadding>
+            <ListItemButton
+              selected={isCurrentPage('/boards', pathname)}
+              onClick={() => handleNavigate('/boards')}
+            >
+              <ListItemIcon>
+                <DashboardIcon />
+              </ListItemIcon>
+              <ListItemText primary={'Boards'} />
+            </ListItemButton>
+          </ListItem>
         </List>
         <Divider sx={{ mt: 'auto' }} />
         <Box py={1} display={'flex'} justifyContent={'center'} alignItems={'center'}>

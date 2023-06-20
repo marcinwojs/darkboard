@@ -22,8 +22,8 @@ export default function Router() {
       element: <RegisterPage />,
     },
     {
-      path: '*',
-      element: <Page404 />,
+      path: '/boards',
+      element: <BoardsPage />,
     },
     {
       path: '/board/:boardId',
@@ -34,12 +34,8 @@ export default function Router() {
       ),
     },
     {
-      path: '/boards',
-      element: (
-        <ProtectedRoutes>
-          <BoardsPage />
-        </ProtectedRoutes>
-      ),
+      path: '*',
+      element: <Page404 />,
     },
   ])
 
