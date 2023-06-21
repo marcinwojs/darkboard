@@ -30,7 +30,7 @@ const BoardsPage = () => {
           setBoards([])
         }
       })
-  }, [])
+  }, [user])
 
   return (
     <Grid container justifyContent={'center'} pt={10}>
