@@ -20,24 +20,21 @@ const Board = () => {
   const { user } = useUserContext()
 
   useEffect(() => {
-    if (user) joinRoom(instanceId, user.id)
-  }, [user])
-
-  useEffect(() => {
     getSingleCollectionItem({ collectionId: 'boards', id: instanceId }).then((data) => {
-      let allowJoin = true
+      let secure = false
       if (user && data.privateBoard) {
-        allowJoin = (data?.privateBoard && user.userBoards.includes(data.boardId)) || false
+        secure = (data?.privateBoard && !user.userBoards.includes(data.boardId)) || false
       }
 
-      if (allowJoin) {
+      if (user && !secure) {
+        joinRoom(instanceId, user.id)
         setBoardData((data as BoardEntity) || null)
         getSingleCollectionItem({ collectionId: 'boardsContent', id: instanceId }).then((data) => {
           setInitData({ elements: deserializeFbaseToExc(data.elements), files: data.files })
         })
       }
     })
-  }, [])
+  }, [user])
 
   if (!(initData && user && boardData)) {
     return (

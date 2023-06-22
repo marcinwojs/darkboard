@@ -1,5 +1,5 @@
 import useFirestore from './useFirestore'
-import { doc, updateDoc } from 'firebase/firestore'
+import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
 export type UserEntity = {
@@ -26,7 +26,25 @@ const useFirestoreUser = () => {
     return addToDoc({ collectionId: 'users', id: userData.id, data: userData })
   }
 
-  return { getUserData, updateUserData, addUser }
+  const getUserDataByEmail = (userEmail: string) => {
+    return new Promise<UserEntity>((resolve, reject) => {
+      const q = query(collection(db, 'users'), where('email', '==', userEmail))
+
+      getDocs(q)
+        .then((querySnapshot) => {
+          let data = null
+          querySnapshot.forEach((doc) => {
+            // doc.data() is never undefined for query doc snapshots
+            data = doc.data()
+          })
+
+          data ? resolve(data) : reject(new Error('no user'))
+        })
+        .catch(() => reject(new Error('no user')))
+    })
+  }
+
+  return { getUserData, updateUserData, addUser, getUserDataByEmail }
 }
 
 export default useFirestoreUser

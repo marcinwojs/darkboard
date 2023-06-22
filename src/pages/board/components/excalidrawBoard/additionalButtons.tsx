@@ -5,6 +5,8 @@ import { useDevice } from '@excalidraw/excalidraw'
 import InjectBefore from '../../../../shared/helpers/injectBefore'
 import StickyNotes from './customTools/stickyNotes'
 import { styled } from '@mui/material/styles'
+import ConfigDialog from '../configDialog/configDialog'
+import { BoardEntity } from '../../../boards/components/boardTable/boardTable'
 
 const DesktopCustomToolIsland = styled(Box)(() => ({
   border: '1px solid var(--sidebar-border-color)',
@@ -23,10 +25,10 @@ const DesktopCustomToolIsland = styled(Box)(() => ({
 }))
 
 type Props = {
-  instanceId: string
+  board: BoardEntity
 }
 
-const AdditionalButtons = ({ instanceId }: Props) => {
+const AdditionalButtons = ({ board }: Props) => {
   const { isMobile } = useDevice()
   const toInject = document.querySelector('.mobile-misc-tools-container')
 
@@ -37,7 +39,8 @@ const AdditionalButtons = ({ instanceId }: Props) => {
           component={
             <Stack flexDirection={'column'}>
               <ViewModeToggle mobile />
-              <ShareButton mobile id={instanceId} />
+              <ConfigDialog mobile board={board} />
+              <ShareButton mobile id={board.boardId} />
               <StickyNotes />
             </Stack>
           }
@@ -50,9 +53,11 @@ const AdditionalButtons = ({ instanceId }: Props) => {
   return (
     <Stack direction={'row'} spacing={1.5}>
       <ViewModeToggle />
-      <ShareButton id={instanceId} />
+      <ShareButton id={board.boardId} />
+
       <DesktopCustomToolIsland>
         <StickyNotes />
+        <ConfigDialog mobile board={board} />
       </DesktopCustomToolIsland>
     </Stack>
   )

@@ -149,7 +149,7 @@ const ExcalidrawBoard = ({
           onChange(elements, files)
         }}
         onPointerUpdate={(payload) => updatePointerPosition(user, payload)}
-        renderTopRightUI={() => <AdditionalButtons instanceId={instanceId} />}
+        renderTopRightUI={() => <AdditionalButtons board={boardData} />}
       >
         <CustomMainMenu boardName={boardData.boardName} />
         <WelcomeScreen>
