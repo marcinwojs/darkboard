@@ -17,7 +17,7 @@ const useCreateBoard = () => {
   const { updateUserData, getUserData } = useFirestoreUser()
   const { addToDoc } = useFirestore()
   const instanceId = humanId()
-  const { user } = useUserContext()
+  const { user, setUser } = useUserContext()
 
   const createBoard = ({ boardName, description, privateBoard, template }: NewBoardProps) => {
     return new Promise(function (myResolve, myReject) {
@@ -55,6 +55,7 @@ const useCreateBoard = () => {
                   newUserData.userBoards.push(instanceId)
                   updateUserData(user?.id || '', newUserData)
                     .then(() => {
+                      setUser(newUserData)
                       myResolve(instanceId)
                     })
                     .catch((reason) => myReject(reason))

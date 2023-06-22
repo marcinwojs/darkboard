@@ -25,10 +25,17 @@ const Board = () => {
 
   useEffect(() => {
     getSingleCollectionItem({ collectionId: 'boards', id: instanceId }).then((data) => {
-      setBoardData((data as BoardEntity) || null)
-    })
-    getSingleCollectionItem({ collectionId: 'boardsContent', id: instanceId }).then((data) => {
-      setInitData({ elements: deserializeFbaseToExc(data.elements), files: data.files })
+      let allowJoin = true
+      if (user && data.privateBoard) {
+        allowJoin = (data?.privateBoard && user.userBoards.includes(data.boardId)) || false
+      }
+
+      if (allowJoin) {
+        setBoardData((data as BoardEntity) || null)
+        getSingleCollectionItem({ collectionId: 'boardsContent', id: instanceId }).then((data) => {
+          setInitData({ elements: deserializeFbaseToExc(data.elements), files: data.files })
+        })
+      }
     })
   }, [])
 
