@@ -27,6 +27,12 @@ const UseAuthorization = () => {
         collectionId: 'users',
         data,
         id: data.id,
+      }).then(() => {
+        return addToDoc({
+          collectionId: 'notifications',
+          id: userCredential.user.uid,
+          data: { notifications: [] },
+        })
       })
     })
   }

@@ -22,6 +22,7 @@ import { BoardEntity } from '../../../boards/components/boardTable/boardTable'
 import CustomMainMenu from './customMainMenu'
 import Logo from '../../../../layout/logo'
 import AdditionalButtons from './additionalButtons'
+import { BoardContentEntity } from '../../../../hooks/useBoardRoom'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)
@@ -99,7 +100,7 @@ const ExcalidrawBoard = ({
 
           if (newFilesElements.length) {
             setOldFilesSet(newSet)
-            getSingleCollectionItem({
+            getSingleCollectionItem<BoardContentEntity>({
               collectionId: 'boardsContent',
               id: `${instanceId}`,
             }).then((data) => excalidrawAPI?.addFiles(Object.values(data.files)))

@@ -39,12 +39,17 @@ const UseFirestore = () => {
     })
   }
 
-  const getSingleCollectionItem = ({ collectionId, id }: GetSingleCollectionItem) => {
-    const docRef = doc(db, collectionId, id)
-    return getDoc(docRef).then((docSnap) => {
-      const data = docSnap.exists() ? docSnap.data() : null
-      if (data === null || data === undefined) throw new Error('No data in database')
-      return data
+  const getSingleCollectionItem = <T>({
+    collectionId,
+    id,
+  }: GetSingleCollectionItem): Promise<T> => {
+    return new Promise((resolve, reject) => {
+      const docRef = doc(db, collectionId, id)
+      return getDoc(docRef).then((docSnap) => {
+        const data = docSnap.exists() ? docSnap.data() : null
+        if (data === null || data === undefined) reject(new Error('Data not found'))
+        resolve(data as T)
+      })
     })
   }
 
