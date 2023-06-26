@@ -17,33 +17,55 @@ const Board = () => {
   const [initData, setInitData] = useState<ExcalidrawInitialDataState | null>(null)
   const [boardData, setBoardData] = useState<BoardEntity | null>(null)
   const [allowJoin, setAllowJoin] = useState(false)
+  const [error, setError] = useState('')
   const { getSingleCollectionItem } = useFirestore()
   const { user } = useUserContext()
   const { joinRoom } = useBoardRoom()
   const instanceId = useParams()?.boardId as string
 
-  useEffect(() => {
+  const fetchBoardData = async () => {
     if (user)
-      getSingleCollectionItem<BoardEntity>({ collectionId: 'boards', id: instanceId }).then(
-        (board) => {
-          setBoardData(board || null)
-          const accessToBoard = user.userBoards.includes(board.boardId)
+      try {
+        const board = await getSingleCollectionItem<BoardEntity>({
+          collectionId: 'boards',
+          id: instanceId,
+        })
+        setBoardData(board || null)
+        const accessToBoard = user.userBoards.includes(board.boardId)
 
-          if (accessToBoard) {
-            joinRoom(board, user.id).then(() =>
-              getSingleCollectionItem<BoardContentEntity>({
-                collectionId: 'boardsContent',
-                id: instanceId,
-              }).then((data) => {
-                setInitData({ elements: deserializeFbaseToExc(data.elements), files: data.files })
-              }),
-            )
+        if (accessToBoard) {
+          try {
+            await joinRoom(board, user.id)
+            const data = await getSingleCollectionItem<BoardContentEntity>({
+              collectionId: 'boardsContent',
+              id: instanceId,
+            })
+            setInitData({ elements: deserializeFbaseToExc(data.elements), files: data.files })
+          } catch (error) {
+            setLoaded(true)
+            setError('We could not download board data')
           }
+        }
 
-          setAllowJoin(accessToBoard)
-          setLoaded(true)
-        },
-      )
+        setAllowJoin(accessToBoard)
+        setLoaded(true)
+      } catch (error) {
+        setLoaded(true)
+        setError('Board not found')
+      }
+  }
+
+  useEffect(() => {
+    setError('')
+    fetchBoardData()
+
+    return () => {
+      setError('')
+      setLoaded(false)
+      setBoardData(null)
+      setInitData(null)
+      setAllowJoin(false)
+    }
   }, [user])
 
   if (!loaded) {
@@ -55,11 +77,25 @@ const Board = () => {
     )
   }
 
-  if (loaded && !allowJoin && boardData && user) {
+  if ((loaded && error) || !boardData || !user) {
+    return (
+      <Stack m={10} spacing={2}>
+        <Typography fontSize={'200px'} textAlign={'center'}>
+          404
+        </Typography>
+        <Typography variant={'h4'} textAlign={'center'}>
+          Error
+        </Typography>
+        <Typography textAlign={'center'}>{error}</Typography>
+      </Stack>
+    )
+  }
+
+  if (loaded && !allowJoin) {
     return <AskAccessView board={boardData} user={user} />
   }
 
-  return boardData && user ? (
+  return (
     <ExcalidrawBoard
       instanceId={instanceId}
       user={user}
@@ -67,7 +103,7 @@ const Board = () => {
       boardData={boardData}
       libraryItems={[...colorNotesList, ...rectNotesList]}
     />
-  ) : null
+  )
 }
 
 export default Board

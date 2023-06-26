@@ -1,5 +1,5 @@
 import { Button, Snackbar, Stack, Typography } from '@mui/material'
-import { Add } from '@mui/icons-material'
+import { Add, Lock } from '@mui/icons-material'
 import useBoardRoom from '../../../../hooks/useBoardRoom'
 import { BoardEntity } from '../../../boards/components/boardTable/boardTable'
 import { UserEntity } from '../../../../providers/firebaseUserProvider'
@@ -27,7 +27,7 @@ const AskAccessView = ({ board, user }: Props) => {
       type: RequestTypes.access,
       metaData: {
         userId: user.id,
-        userName: user.firstName
+        userName: user.firstName,
       },
     }
 
@@ -42,16 +42,19 @@ const AskAccessView = ({ board, user }: Props) => {
           setResponse('The owner of the board got a request for access'),
         )
       })
-      .catch(() => {
-        setResponse('we could not send a request for access')
+      .catch((reason) => {
+        setResponse(reason.message || 'we could not send a request for access')
       })
   }
 
   return (
-    <Stack m={10} spacing={2}>
-      <Typography textAlign={'center'}>Ask request for board access</Typography>
-      <Button startIcon={<Add />} onClick={handleAskAccess}>
-        Ask for Access to board
+    <Stack mt={15} spacing={2} justifyContent={'center'} alignItems={'center'}>
+      <Lock sx={{ fontSize: '160px' }} />
+      <Typography variant={'h4'} textAlign={'center'}>
+        You do not have access to this board.
+      </Typography>
+      <Button size={'large'} startIcon={<Add />} onClick={handleAskAccess}>
+        Ask for access
       </Button>
       <Snackbar
         open={Boolean(response)}

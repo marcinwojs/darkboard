@@ -1,10 +1,10 @@
 import useFirestoreUser from './useFirestoreUser'
 import useFirestore from './useFirestore'
-import { arrayUnion, arrayRemove } from 'firebase/firestore'
+import { arrayRemove, arrayUnion } from 'firebase/firestore'
 import { BoardEntity } from '../pages/boards/components/boardTable/boardTable'
 import { SerializedExcalidrawElement } from '../pages/board/components/excalidrawBoard/excalidrawBoard'
 import { BinaryFiles } from '@excalidraw/excalidraw/types/types'
-import { RequestData, RequestEntity } from '../shared/types'
+import { RequestData, RequestEntity, RequestTypes } from '../shared/types'
 import { v4 as uuidv4 } from 'uuid'
 
 export type BoardContentEntity = {
@@ -85,13 +85,24 @@ const useBoardRoom = () => {
       date: 'now',
     }
 
-    return updateDocField({
-      collectionId: 'boards',
-      id: roomId,
-      data: {
-        requests: arrayUnion(request),
+    return getSingleCollectionItem<BoardEntity>({ id: roomId, collectionId: 'boards' }).then(
+      (boardData) => {
+        const alreadyAskForAccess = boardData.requests.find(
+          (existedRequest) => existedRequest.metaData.userId === requestData.metaData.userId,
+        )
+        if (requestData.type === RequestTypes.access && boardData && alreadyAskForAccess){
+          throw new Error('Already asked access request')
+        }
+
+          return updateDocField({
+            collectionId: 'boards',
+            id: roomId,
+            data: {
+              requests: arrayUnion(request),
+            },
+          })
       },
-    })
+    )
   }
 
   return { joinRoom, leaveRoom, createRequest }
