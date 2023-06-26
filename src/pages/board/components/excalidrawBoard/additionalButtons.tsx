@@ -7,6 +7,7 @@ import StickyNotes from './customTools/stickyNotes'
 import { styled } from '@mui/material/styles'
 import ConfigDialog from '../configDialog/configDialog'
 import { BoardEntity } from '../../../boards/components/boardTable/boardTable'
+import RequestsDialog from '../requestsDialog/requestsDialog'
 
 const DesktopCustomToolIsland = styled(Box)(() => ({
   border: '1px solid var(--sidebar-border-color)',
@@ -26,9 +27,10 @@ const DesktopCustomToolIsland = styled(Box)(() => ({
 
 type Props = {
   board: BoardEntity
+  isAdmin: boolean
 }
 
-const AdditionalButtons = ({ board }: Props) => {
+const AdditionalButtons = ({ board, isAdmin }: Props) => {
   const { isMobile } = useDevice()
   const toInject = document.querySelector('.mobile-misc-tools-container')
 
@@ -39,7 +41,8 @@ const AdditionalButtons = ({ board }: Props) => {
           component={
             <Stack flexDirection={'column'}>
               <ViewModeToggle mobile />
-              <ConfigDialog mobile board={board} />
+              {isAdmin ? <ConfigDialog mobile board={board} /> : null}
+              {isAdmin ? <RequestsDialog mobile board={board} /> : null}
               <ShareButton mobile id={board.boardId} />
               <StickyNotes />
             </Stack>
@@ -54,10 +57,10 @@ const AdditionalButtons = ({ board }: Props) => {
     <Stack direction={'row'} spacing={1.5}>
       <ViewModeToggle />
       <ShareButton id={board.boardId} />
-
       <DesktopCustomToolIsland>
         <StickyNotes />
-        <ConfigDialog mobile board={board} />
+        {isAdmin ? <ConfigDialog mobile board={board} /> : null}
+        {isAdmin ? <RequestsDialog mobile board={board} /> : null}
       </DesktopCustomToolIsland>
     </Stack>
   )

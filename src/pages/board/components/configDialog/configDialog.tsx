@@ -42,9 +42,9 @@ const ConfigDialog = ({ mobile = false, board }: Props) => {
 
   const onSubmit = async (email: string) => {
     try {
-      // await getUserDataByEmail(email).then((d) =>
-      //   joinRoom(board.boardId, d.id).then(() => handleResponse(true)),
-      // )
+      await getUserDataByEmail(email).then((d) =>
+        joinRoom(board, d.id).then(() => handleResponse(true)),
+      )
     } catch (exceptionVar) {
       handleResponse(false)
     }

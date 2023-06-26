@@ -6,6 +6,7 @@ export type AccessRequestData = {
   type: RequestTypes.access
   metaData: {
     userId: string
+    userName: string
   }
 }
 
