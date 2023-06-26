@@ -17,9 +17,9 @@ import moment from 'moment'
 import { convertToObjectDate } from '../../../../shared/utils'
 import { styled } from '@mui/material/styles'
 import { UserEntity } from '../../../../providers/firebaseUserProvider'
-import LockIcon from '@mui/icons-material/Lock'
 import BoardInfoTooltipBtn from './boardInfoTooltipBtn'
 import ControlButtonsGroup from './controlButtonsGroup'
+import { RequestEntity } from '../../../../shared/types'
 
 const CenteredCell = styled(TableCell)(() => ({
   textAlign: 'center',
@@ -34,7 +34,7 @@ type UserBoardEntity = {
 export type BoardEntity = {
   boardId: string
   boardName: string
-  privateBoard: boolean
+  requests: RequestEntity[]
   description: string
   creatorId: string
   lastEdit: { seconds: number; nanoseconds: number }
@@ -66,34 +66,27 @@ const BoardTable = ({ boards, user }: Props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {boards.map(
-              ({ boardId, boardName, creatorId, lastEdit, description, users, privateBoard }) => (
-                <TableRow key={boardId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
-                  <CenteredCell>
-                    <Stack direction={'row'} position={'relative'}>
-                      {privateBoard ? (
-                        <Tooltip title={'Private board'}>
-                          <LockIcon sx={{ position: 'absolute', fontSize: '13px', top: -4 }} />
-                        </Tooltip>
-                      ) : null}
-                      <Typography pl={1.4}>{boardName}</Typography>
-                    </Stack>
-                  </CenteredCell>
-                  <CenteredCell padding={'none'}>
-                    <BoardInfoTooltipBtn
-                      description={description}
-                      lastEdit={moment(convertToObjectDate(lastEdit)).fromNow()}
-                    />
-                  </CenteredCell>
-                  <CenteredCell>
-                    <AvatarGroup users={users} creatorId={creatorId} />
-                  </CenteredCell>
-                  <CenteredCell padding={'none'}>
-                    <ControlButtonsGroup boardId={boardId} creatorId={creatorId} userId={user.id} />
-                  </CenteredCell>
-                </TableRow>
-              ),
-            )}
+            {boards.map(({ boardId, boardName, creatorId, lastEdit, description, users }) => (
+              <TableRow key={boardId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                <CenteredCell>
+                  <Stack direction={'row'}>
+                    <Typography pl={1.4}>{boardName}</Typography>
+                  </Stack>
+                </CenteredCell>
+                <CenteredCell padding={'none'}>
+                  <BoardInfoTooltipBtn
+                    description={description}
+                    lastEdit={moment(convertToObjectDate(lastEdit)).fromNow()}
+                  />
+                </CenteredCell>
+                <CenteredCell>
+                  <AvatarGroup users={users} creatorId={creatorId} />
+                </CenteredCell>
+                <CenteredCell padding={'none'}>
+                  <ControlButtonsGroup boardId={boardId} creatorId={creatorId} userId={user.id} />
+                </CenteredCell>
+              </TableRow>
+            ))}
           </TableBody>
         </Table>
       </TableContainer>

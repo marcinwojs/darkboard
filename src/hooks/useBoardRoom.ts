@@ -4,6 +4,8 @@ import { arrayUnion, arrayRemove } from 'firebase/firestore'
 import { BoardEntity } from '../pages/boards/components/boardTable/boardTable'
 import { SerializedExcalidrawElement } from '../pages/board/components/excalidrawBoard/excalidrawBoard'
 import { BinaryFiles } from '@excalidraw/excalidraw/types/types'
+import { RequestData, RequestEntity } from '../shared/types'
+import { v4 as uuidv4 } from 'uuid'
 
 export type BoardContentEntity = {
   elements: SerializedExcalidrawElement[]
@@ -14,16 +16,18 @@ const useBoardRoom = () => {
   const { updateUserData, getUserData } = useFirestoreUser()
   const { updateDocField, getSingleCollectionItem } = useFirestore()
 
-  const joinRoom = (roomId: string, userId: string) => {
-    return getSingleCollectionItem<BoardEntity>({ collectionId: 'boards', id: roomId }).then(
-      (board) => {
-        if (board.users.find((user: { id: string }) => user.id === userId)) {
-          return board
-        } else {
-          return getUserData(userId).then((userData) => {
+  const joinRoom = (board: BoardEntity, userId: string) => {
+    const alreadyInBoard = board.users.find((user: { id: string }) => user.id === userId)
+
+    return new Promise((resolve, reject) => {
+      if (alreadyInBoard) {
+        return resolve(true)
+      } else {
+        return getUserData(userId)
+          .then((userData) => {
             return updateDocField({
               collectionId: 'boards',
-              id: roomId,
+              id: board.boardId,
               data: {
                 ...board,
                 users: arrayUnion({
@@ -34,13 +38,15 @@ const useBoardRoom = () => {
               },
             }).then(() => {
               return updateUserData(userId, {
-                userBoards: [...userData.userBoards, roomId],
-              }).then(() => board)
+                userBoards: [...userData.userBoards, board.boardId],
+              })
+                .then(() => resolve(board))
+                .catch(() => reject(new Error('No data found')))
             })
           })
-        }
-      },
-    )
+          .catch(() => reject(new Error('No data found')))
+      }
+    })
   }
 
   const leaveRoom = (roomId: string, userId: string) => {
@@ -72,7 +78,23 @@ const useBoardRoom = () => {
     )
   }
 
-  return { joinRoom, leaveRoom }
+  const createRequest = (roomId: string, requestData: RequestData) => {
+    const request: RequestEntity = {
+      ...requestData,
+      id: uuidv4(),
+      date: 'now',
+    }
+
+    return updateDocField({
+      collectionId: 'boards',
+      id: roomId,
+      data: {
+        requests: arrayUnion(request),
+      },
+    })
+  }
+
+  return { joinRoom, leaveRoom, createRequest }
 }
 
 export default useBoardRoom

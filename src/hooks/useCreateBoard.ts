@@ -19,16 +19,16 @@ const useCreateBoard = () => {
   const instanceId = humanId()
   const { user, setUser } = useUserContext()
 
-  const createBoard = ({ boardName, description, privateBoard, template }: NewBoardProps) => {
+  const createBoard = ({ boardName, description, template }: NewBoardProps) => {
     return new Promise(function (myResolve, myReject) {
       const data: BoardEntity = {
         boardId: instanceId,
         creatorId: user?.id || '',
         boardName,
         description,
-        privateBoard,
         lastEdit: convertFromDateObject(new Date()),
         users: [{ name: user?.firstName || '', id: user?.id || '', creator: true }],
+        requests: [],
       }
 
       return addToDoc({

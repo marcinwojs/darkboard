@@ -3,57 +3,50 @@ import { useParams } from 'react-router-dom'
 import { useEffect, useState } from 'react'
 import { ExcalidrawInitialDataState } from '@excalidraw/excalidraw/types/types'
 import useFirestore from '../../hooks/useFirestore'
-import { Button, LinearProgress, Stack, Typography } from '@mui/material'
+import { LinearProgress, Stack, Typography } from '@mui/material'
 import ExcalidrawBoard from './components/excalidrawBoard/excalidrawBoard'
 import { useUserContext } from '../../providers/firebaseUserProvider'
 import { deserializeFbaseToExc } from '../../shared/utils'
 import { BoardEntity } from '../boards/components/boardTable/boardTable'
 import { rectNotesList } from '../../libraries/stickyNotes/rectNote'
 import { colorNotesList } from '../../libraries/stickyNotes/colorNote'
-import { Add } from '@mui/icons-material'
+import AskAccessView from './components/askAccess/askAccessView'
 
 const Board = () => {
-  const { joinRoom } = useBoardRoom()
-  const instanceId = useParams()?.boardId as string
+  const [loaded, setLoaded] = useState(false)
   const [initData, setInitData] = useState<ExcalidrawInitialDataState | null>(null)
   const [boardData, setBoardData] = useState<BoardEntity | null>(null)
   const [allowJoin, setAllowJoin] = useState(false)
   const { getSingleCollectionItem } = useFirestore()
   const { user } = useUserContext()
+  const { joinRoom } = useBoardRoom()
+  const instanceId = useParams()?.boardId as string
 
   useEffect(() => {
-    getSingleCollectionItem<BoardEntity>({ collectionId: 'boards', id: instanceId }).then(
-      (data) => {
-        let access = false
-        if (user && data.privateBoard) {
-          access = (data?.privateBoard && user.userBoards.includes(data.boardId)) || false
-        }
-        setBoardData((data as BoardEntity) || null)
+    if (user)
+      getSingleCollectionItem<BoardEntity>({ collectionId: 'boards', id: instanceId }).then(
+        (board) => {
+          setBoardData(board || null)
+          const accessToBoard = user.userBoards.includes(board.boardId)
 
-        if (user && access) {
-          joinRoom(instanceId, user.id)
-          setAllowJoin(true)
-          getSingleCollectionItem<BoardContentEntity>({
-            collectionId: 'boardsContent',
-            id: instanceId,
-          }).then((data) => {
-            setInitData({ elements: deserializeFbaseToExc(data.elements), files: data.files })
-          })
-        }
-      },
-    )
+          if (accessToBoard) {
+            joinRoom(board, user.id).then(() =>
+              getSingleCollectionItem<BoardContentEntity>({
+                collectionId: 'boardsContent',
+                id: instanceId,
+              }).then((data) => {
+                setInitData({ elements: deserializeFbaseToExc(data.elements), files: data.files })
+              }),
+            )
+          }
+
+          setAllowJoin(accessToBoard)
+          setLoaded(true)
+        },
+      )
   }, [user])
 
-  if (boardData && !allowJoin) {
-    return (
-      <Stack m={10} spacing={2}>
-        <Typography>Ask request for board access</Typography>
-        <Button startIcon={<Add />}>Ask for request</Button>
-      </Stack>
-    )
-  }
-
-  if (!(initData && user && boardData)) {
+  if (!loaded) {
     return (
       <Stack m={10} spacing={2}>
         <Typography textAlign={'center'}>Loading...</Typography>
@@ -62,7 +55,11 @@ const Board = () => {
     )
   }
 
-  return (
+  if (loaded && !allowJoin && boardData && user) {
+    return <AskAccessView board={boardData} user={user} />
+  }
+
+  return boardData && user ? (
     <ExcalidrawBoard
       instanceId={instanceId}
       user={user}
@@ -70,7 +67,7 @@ const Board = () => {
       boardData={boardData}
       libraryItems={[...colorNotesList, ...rectNotesList]}
     />
-  )
+  ) : null
 }
 
 export default Board
