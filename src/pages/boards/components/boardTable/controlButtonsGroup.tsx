@@ -72,10 +72,10 @@ const ControlButtonsGroup = ({ userId, board }: Props) => {
         <ShareButton size={'small'} id={boardId} />
         {creatorId === userId ? (
           <>
-            <RequestsDialog board={board} />
             <TooltipButton tipText={'Delete Board'} onClick={() => onRemoveBoard(boardId)}>
               <DeleteForever fontSize={'small'} />
             </TooltipButton>
+            <RequestsDialog board={board} />
           </>
         ) : (
           <TooltipButton tipText={'Remove me from Board'} onClick={() => onLeaveBoard(boardId)}>

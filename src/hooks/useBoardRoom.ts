@@ -4,17 +4,38 @@ import { arrayRemove, arrayUnion } from 'firebase/firestore'
 import { BoardEntity } from '../pages/boards/components/boardTable/boardTable'
 import { SerializedExcalidrawElement } from '../pages/board/components/excalidrawBoard/excalidrawBoard'
 import { BinaryFiles } from '@excalidraw/excalidraw/types/types'
-import { RequestData, RequestEntity, RequestTypes } from '../shared/types'
 import { v4 as uuidv4 } from 'uuid'
+import { deserializeFbaseToExc } from '../shared/utils'
+import useNotifications, { NotificationTypes } from './useNotifications'
+import { UserEntity } from '../providers/firebaseUserProvider'
 
 export type BoardContentEntity = {
   elements: SerializedExcalidrawElement[]
   files: BinaryFiles
 }
 
+export enum RequestTypes {
+  access = 'access',
+}
+
+export type AccessRequestData = {
+  type: RequestTypes.access
+  metaData: {
+    userId: string
+    userName: string
+  }
+}
+type RequestBase = {
+  id: string
+  date: string
+}
+
+export type AccessRequestEntity = AccessRequestData & RequestBase
+
 const useBoardRoom = () => {
   const { updateUserData, getUserData } = useFirestoreUser()
   const { updateDocField, getSingleCollectionItem } = useFirestore()
+  const { createNotification } = useNotifications()
 
   const joinRoom = (board: BoardEntity, userId: string) => {
     const alreadyInBoard = board.users.find((user: { id: string }) => user.id === userId)
@@ -76,14 +97,30 @@ const useBoardRoom = () => {
     )
   }
 
-  const createRequest = (roomId: string, requestData: RequestData) => {
-    const request: RequestEntity = {
+  const getBoardInitialData = (boardId: string) => {
+    return getSingleCollectionItem<BoardContentEntity>({
+      collectionId: 'boardsContent',
+      id: boardId,
+    }).then((initialData) => {
+      return {
+        elements: deserializeFbaseToExc(initialData.elements),
+        files: initialData.files,
+      }
+    })
+  }
+
+  const createAccessRequest = (
+    board: BoardEntity,
+    user: UserEntity,
+    requestData: AccessRequestData,
+  ) => {
+    const request: AccessRequestEntity = {
       ...requestData,
       id: uuidv4(),
       date: 'now',
     }
 
-    return getSingleCollectionItem<BoardEntity>({ id: roomId, collectionId: 'boards' }).then(
+    return getSingleCollectionItem<BoardEntity>({ id: board.boardId, collectionId: 'boards' }).then(
       (boardData) => {
         const alreadyAskForAccess = boardData.requests.find(
           (existedRequest) => existedRequest.metaData.userId === requestData.metaData.userId,
@@ -94,16 +131,34 @@ const useBoardRoom = () => {
 
         return updateDocField({
           collectionId: 'boards',
-          id: roomId,
+          id: board.boardId,
           data: {
             requests: arrayUnion(request),
           },
         })
+          .then(() => {
+            const notificationData = {
+              type: NotificationTypes.request,
+              message: `User ${user.firstName} (${user.email}) ask for access to board (${board.boardName})`,
+            }
+            return createNotification(board.boardId, notificationData).then(
+              () => 'The owner of the board got a request for access',
+            )
+          })
+          .catch((reason) => reason.message || 'we could not send a request for access')
       },
     )
   }
 
-  return { joinRoom, leaveRoom, createRequest }
+  const removeRequest = (boardId: string, removedRequest: AccessRequestEntity) => {
+    return updateDocField({
+      id: boardId,
+      collectionId: 'boards',
+      data: { requests: arrayRemove(removedRequest) },
+    })
+  }
+
+  return { joinRoom, leaveRoom, getBoardInitialData, createAccessRequest, removeRequest }
 }
 
 export default useBoardRoom

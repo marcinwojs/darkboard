@@ -2,18 +2,6 @@ import useFirestore from './useFirestore'
 import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore'
 import { db } from '../config/firebase'
 
-export type NotificationEntity = {
-  requestId: string
-  userId: string
-  message: string
-  date: string
-}
-
-export type notificationsCollection = {
-  userId: string
-  notifications: NotificationEntity[]
-}
-
 export type UserEntity = {
   email: string
   firstName: string
@@ -25,9 +13,7 @@ const useFirestoreUser = () => {
   const { addToDoc, getSingleCollectionItem } = useFirestore()
 
   const getUserData = (userId: string) => {
-    return getSingleCollectionItem({ collectionId: 'users', id: userId }).then(
-      (data) => data as UserEntity,
-    )
+    return getSingleCollectionItem<UserEntity>({ collectionId: 'users', id: userId })
   }
 
   const updateUserData = (id: string, userData: Partial<UserEntity>) => {

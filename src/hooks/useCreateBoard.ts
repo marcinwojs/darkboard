@@ -9,7 +9,6 @@ import { BoardsTemplatesKeys, boardTemplates } from '../templates/templates'
 export type NewBoardProps = {
   boardName: string
   description: string
-  privateBoard: boolean
   template: BoardsTemplatesKeys
 }
 

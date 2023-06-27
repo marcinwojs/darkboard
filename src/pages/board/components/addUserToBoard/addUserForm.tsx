@@ -1,11 +1,11 @@
-import { FormControl, Input, InputAdornment, InputLabel, TextField } from '@mui/material'
+import { FormControl, Input, InputAdornment, InputLabel } from '@mui/material'
 import TooltipButton from '../../../../shared/components/tooltipButton/tooltipButton'
-import AddIcon from '@mui/icons-material/Add'
 import { useState } from 'react'
 
 type Props = {
   onSubmit: (email: string) => void
 }
+
 const AddUserForm = ({ onSubmit }: Props) => {
   const [formState, setFormState] = useState('')
 

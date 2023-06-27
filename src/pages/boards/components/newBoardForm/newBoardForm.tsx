@@ -1,7 +1,6 @@
 import {
   Button,
   ButtonProps,
-  Checkbox,
   Dialog,
   DialogActions,
   DialogContent,
@@ -31,7 +30,6 @@ type Props = {
 const initialFormState: NewBoardProps = {
   boardName: '',
   description: '',
-  privateBoard: false,
   template: BoardsTemplatesKeys.blank,
 }
 
@@ -99,19 +97,6 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
                   setFormState({ ...formState, description: event.target.value })
                 }
               />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={formState.privateBoard}
-                    sx={{ paddingLeft: 0 }}
-                    onChange={(event) =>
-                      setFormState({ ...formState, privateBoard: event.target.checked })
-                    }
-                  />
-                }
-                label='Private Room'
-              />
-
               <FormControl>
                 <FormLabel>Board Templates</FormLabel>
                 <RadioGroup

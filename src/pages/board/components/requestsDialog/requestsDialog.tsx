@@ -15,10 +15,7 @@ import { useRef, useState } from 'react'
 import TooltipButton from '../../../../shared/components/tooltipButton/tooltipButton'
 import { BoardEntity } from '../../../boards/components/boardTable/boardTable'
 import { Close, LocalPostOffice } from '@mui/icons-material'
-import useFirestore from '../../../../hooks/useFirestore'
-import { arrayRemove } from 'firebase/firestore'
-import { RequestEntity } from '../../../../shared/types'
-import useBoardRoom from '../../../../hooks/useBoardRoom'
+import useBoardRoom, { AccessRequestEntity } from '../../../../hooks/useBoardRoom'
 import useFirestoreUser from '../../../../hooks/useFirestoreUser'
 
 type Props = {
@@ -29,9 +26,9 @@ type Props = {
 const RequestsDialog = ({ mobile = false, board }: Props) => {
   const requests = board.requests
   const [open, setOpen] = useState(false)
-  const { updateDocField } = useFirestore()
-  const { joinRoom } = useBoardRoom()
+  const { joinRoom, removeRequest } = useBoardRoom()
   const { getUserData } = useFirestoreUser()
+
   const handleClickOpen = () => {
     setOpen(true)
   }
@@ -39,11 +36,12 @@ const RequestsDialog = ({ mobile = false, board }: Props) => {
   const handleClose = () => setOpen(false)
   const ref = useRef<HTMLDivElement>(null)
 
-  const acceptAccessRequest = async (userId: string, request: RequestEntity) => {
+  // TODO change accept request
+  const acceptAccessRequest = async (userId: string, request: AccessRequestEntity) => {
     try {
       await getUserData(userId).then((d) =>
         joinRoom(board, d.id).then(() =>
-          removeRequest(request).then(() => {
+          removeRequest(board.boardId, request).then(() => {
             console.log('success')
           }),
         ),
@@ -51,14 +49,6 @@ const RequestsDialog = ({ mobile = false, board }: Props) => {
     } catch (exceptionVar) {
       console.log('fail')
     }
-  }
-
-  const removeRequest = (request: RequestEntity) => {
-    return updateDocField({
-      id: board.boardId,
-      collectionId: 'boards',
-      data: { requests: arrayRemove(request) },
-    })
   }
 
   return (
@@ -82,7 +72,7 @@ const RequestsDialog = ({ mobile = false, board }: Props) => {
         </Badge>
       </TooltipButton>
       <Dialog ref={ref} open={open} onClose={handleClose} fullWidth>
-        <DialogTitle id='alert-dialog-title'>
+        <DialogTitle>
           Board Requests
           <IconButton
             aria-label='close'
@@ -123,7 +113,7 @@ const RequestsDialog = ({ mobile = false, board }: Props) => {
                           Accept
                         </Button>
                         <Button
-                          onClick={() => removeRequest(request)}
+                          onClick={() => removeRequest(board.boardId, request)}
                           size={'small'}
                           color={'error'}
                           variant={'contained'}

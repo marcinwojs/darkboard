@@ -13,7 +13,7 @@ type Props = {
   board: BoardEntity
 }
 
-const ConfigDialog = ({ mobile = false, board }: Props) => {
+const AddUserToBoard = ({ mobile = false, board }: Props) => {
   const [open, setOpen] = useState(false)
   const [response, setResponse] = useState<boolean | null>(null)
   const { joinRoom } = useBoardRoom()
@@ -52,11 +52,16 @@ const ConfigDialog = ({ mobile = false, board }: Props) => {
 
   return (
     <div>
-      <TooltipButton mobile={mobile} size={'small'} tipText={'settings'} onClick={handleClickOpen}>
+      <TooltipButton
+        mobile={mobile}
+        size={'small'}
+        tipText={'Add new user'}
+        onClick={handleClickOpen}
+      >
         <PersonAdd fontSize={'inherit'} />
       </TooltipButton>
       <Dialog ref={ref} open={open} onClose={handleClose} fullWidth>
-        <DialogTitle id='alert-dialog-title'>
+        <DialogTitle>
           Add new User
           <IconButton
             aria-label='close'
@@ -83,4 +88,4 @@ const ConfigDialog = ({ mobile = false, board }: Props) => {
   )
 }
 
-export default ConfigDialog
+export default AddUserToBoard

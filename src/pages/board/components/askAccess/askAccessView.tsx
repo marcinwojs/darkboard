@@ -1,29 +1,23 @@
 import { Button, Snackbar, Stack, Typography } from '@mui/material'
 import { Add, Lock } from '@mui/icons-material'
-import useBoardRoom from '../../../../hooks/useBoardRoom'
+import useBoardRoom, { AccessRequestData, RequestTypes } from '../../../../hooks/useBoardRoom'
 import { BoardEntity } from '../../../boards/components/boardTable/boardTable'
 import { UserEntity } from '../../../../providers/firebaseUserProvider'
-import {
-  NotificationData,
-  NotificationTypes,
-  RequestData,
-  RequestTypes,
-} from '../../../../shared/types'
+
 import React, { useState } from 'react'
-import useNotifications from '../../../../hooks/useNotifications'
 
 type Props = {
   board: BoardEntity
   user: UserEntity
 }
 
+// TODO change whole component
 const AskAccessView = ({ board, user }: Props) => {
-  const { createRequest } = useBoardRoom()
-  const { createNotification } = useNotifications()
+  const { createAccessRequest } = useBoardRoom()
   const [response, setResponse] = useState('')
 
-  const handleAskAccess = () => {
-    const accessRequest: RequestData = {
+  const handleAskAccess = async () => {
+    const accessRequest: AccessRequestData = {
       type: RequestTypes.access,
       metaData: {
         userId: user.id,
@@ -31,20 +25,15 @@ const AskAccessView = ({ board, user }: Props) => {
       },
     }
 
-    const notificationData: NotificationData = {
-      type: NotificationTypes.request,
-      message: `User ${user.firstName} (${user.email}) ask for access to board (${board.boardName})`,
+    try {
+      const response = await createAccessRequest(board, user, accessRequest)
+      setResponse(response)
+    } catch (error) {
+      if (error instanceof Error) {
+        setResponse(error.message)
+      }
+      setResponse('Unexpected Error')
     }
-
-    createRequest(board.boardId, accessRequest)
-      .then(() => {
-        return createNotification(board.creatorId, notificationData).then(() =>
-          setResponse('The owner of the board got a request for access'),
-        )
-      })
-      .catch((reason) => {
-        setResponse(reason.message || 'we could not send a request for access')
-      })
   }
 
   return (
