@@ -11,6 +11,8 @@ import { BoardEntity } from '../boards/components/boardTable/boardTable'
 import { rectNotesList } from '../../libraries/stickyNotes/rectNote'
 import { colorNotesList } from '../../libraries/stickyNotes/colorNote'
 import AskAccessView from './components/askAccess/askAccessView'
+import { doc, onSnapshot } from 'firebase/firestore'
+import { db } from '../../config/firebase'
 
 const Board = () => {
   const [loaded, setLoaded] = useState(false)
@@ -23,48 +25,50 @@ const Board = () => {
   const { joinRoom } = useBoardRoom()
   const instanceId = useParams()?.boardId as string
 
-  const fetchBoardData = async () => {
-    if (user)
-      try {
-        const board = await getSingleCollectionItem<BoardEntity>({
-          collectionId: 'boards',
-          id: instanceId,
-        })
-        setBoardData(board || null)
-        const accessToBoard = user.userBoards.includes(board.boardId)
-
-        if (accessToBoard) {
-          try {
-            await joinRoom(board, user.id)
-            const data = await getSingleCollectionItem<BoardContentEntity>({
-              collectionId: 'boardsContent',
-              id: instanceId,
-            })
-            setInitData({ elements: deserializeFbaseToExc(data.elements), files: data.files })
-          } catch (error) {
-            setLoaded(true)
-            setError('We could not download board data')
-          }
-        }
-
-        setAllowJoin(accessToBoard)
-        setLoaded(true)
-      } catch (error) {
-        setLoaded(true)
-        setError('Board not found')
-      }
-  }
-
   useEffect(() => {
-    setError('')
-    fetchBoardData()
+    if (user) {
+      const unsubscribe = onSnapshot(doc(db, 'boards', instanceId), (doc) => {
+        const board = doc.data() as BoardEntity
 
-    return () => {
-      setError('')
-      setLoaded(false)
-      setBoardData(null)
-      setInitData(null)
-      setAllowJoin(false)
+        if (board) {
+          setBoardData(board || null)
+          const accessToBoard = user.userBoards.includes(board.boardId)
+
+          if (accessToBoard) {
+            joinRoom(board, user.id)
+              .then(() => {
+                getSingleCollectionItem<BoardContentEntity>({
+                  collectionId: 'boardsContent',
+                  id: instanceId,
+                }).then((initialData) => {
+                  setInitData({
+                    elements: deserializeFbaseToExc(initialData.elements),
+                    files: initialData.files,
+                  })
+                })
+              })
+              .catch(() => {
+                setLoaded(true)
+                setError('We could not download board data')
+              })
+          }
+
+          setAllowJoin(accessToBoard)
+          setLoaded(true)
+        } else {
+          setLoaded(true)
+          setError('Board not found')
+        }
+      })
+
+      return () => {
+        unsubscribe()
+        setError('')
+        setLoaded(false)
+        setBoardData(null)
+        setInitData(null)
+        setAllowJoin(false)
+      }
     }
   }, [user])
 

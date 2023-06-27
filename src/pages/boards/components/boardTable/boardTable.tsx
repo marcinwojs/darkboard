@@ -8,7 +8,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
   Typography,
 } from '@mui/material'
 import AvatarGroup from '../../../../shared/components/avatar/avatarGroup'
@@ -27,7 +26,6 @@ const CenteredCell = styled(TableCell)(() => ({
 
 type UserBoardEntity = {
   name: string
-  creator: boolean
   id: string
 }
 
@@ -66,24 +64,27 @@ const BoardTable = ({ boards, user }: Props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {boards.map(({ boardId, boardName, creatorId, lastEdit, description, users }) => (
-              <TableRow key={boardId} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+            {boards.map((board) => (
+              <TableRow
+                key={board.boardId}
+                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+              >
                 <CenteredCell>
                   <Stack direction={'row'}>
-                    <Typography pl={1.4}>{boardName}</Typography>
+                    <Typography pl={1.4}>{board.boardName}</Typography>
                   </Stack>
                 </CenteredCell>
                 <CenteredCell padding={'none'}>
                   <BoardInfoTooltipBtn
-                    description={description}
-                    lastEdit={moment(convertToObjectDate(lastEdit)).fromNow()}
+                    description={board.description}
+                    lastEdit={moment(convertToObjectDate(board.lastEdit)).fromNow()}
                   />
                 </CenteredCell>
                 <CenteredCell>
-                  <AvatarGroup users={users} creatorId={creatorId} />
+                  <AvatarGroup users={board.users} creatorId={board.creatorId} />
                 </CenteredCell>
                 <CenteredCell padding={'none'}>
-                  <ControlButtonsGroup boardId={boardId} creatorId={creatorId} userId={user.id} />
+                  <ControlButtonsGroup board={board} userId={user.id} />
                 </CenteredCell>
               </TableRow>
             ))}

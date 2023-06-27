@@ -98,42 +98,50 @@ const RequestsDialog = ({ mobile = false, board }: Props) => {
         </DialogTitle>
         <DialogContent>
           <Grid container spacing={1} minHeight={'200px'} maxHeight={'500px'} overflow={'auto'}>
-            {requests.map((request) => {
-              return (
-                <Grid key={request.id} item xs={12}>
-                  <Stack
-                    p={1}
-                    component={Paper}
-                    flexDirection={'row'}
-                    alignItems={'center'}
-                    justifyContent={'space-between'}
-                  >
-                    <Typography>
-                      User {request.metaData.userName} ask for access to board
-                    </Typography>
-                    <Box px={3}>
-                      <Button
-                        onClick={() => acceptAccessRequest(request.metaData.userId, request)}
-                        sx={{ mr: 4 }}
-                        size={'small'}
-                        color={'success'}
-                        variant={'contained'}
-                      >
-                        Accept
-                      </Button>
-                      <Button
-                        onClick={() => removeRequest(request)}
-                        size={'small'}
-                        color={'error'}
-                        variant={'contained'}
-                      >
-                        Reject
-                      </Button>
-                    </Box>
-                  </Stack>
-                </Grid>
-              )
-            })}
+            {requests.length ? (
+              requests.map((request) => {
+                return (
+                  <Grid key={request.id} item xs={12}>
+                    <Stack
+                      p={1}
+                      component={Paper}
+                      flexDirection={'row'}
+                      alignItems={'center'}
+                      justifyContent={'space-between'}
+                    >
+                      <Typography>
+                        User {request.metaData.userName} ask for access to board
+                      </Typography>
+                      <Box px={3}>
+                        <Button
+                          onClick={() => acceptAccessRequest(request.metaData.userId, request)}
+                          sx={{ mr: 4 }}
+                          size={'small'}
+                          color={'success'}
+                          variant={'contained'}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          onClick={() => removeRequest(request)}
+                          size={'small'}
+                          color={'error'}
+                          variant={'contained'}
+                        >
+                          Reject
+                        </Button>
+                      </Box>
+                    </Stack>
+                  </Grid>
+                )
+              })
+            ) : (
+              <Grid item xs={12}>
+                <Typography fontSize={'larger'} textAlign={'center'}>
+                  No Requests
+                </Typography>
+              </Grid>
+            )}
           </Grid>
         </DialogContent>
       </Dialog>

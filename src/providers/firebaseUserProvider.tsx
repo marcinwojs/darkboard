@@ -1,7 +1,8 @@
 import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react'
 import { onAuthStateChanged } from 'firebase/auth'
-import { auth } from '../config/firebase'
+import { auth, db } from '../config/firebase'
 import useFirestore from '../hooks/useFirestore'
+import { doc, onSnapshot } from 'firebase/firestore'
 
 export type UserEntity = {
   firstName: string
@@ -28,7 +29,6 @@ export const useUserContext = () => useContext<FirebaseUserContextType>(Firebase
 const FirebaseUserProvider: FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<UserEntity | null>(null)
   const [loaded, setLoaded] = useState(false)
-  const { getSingleCollectionItem } = useFirestore()
 
   useEffect(() => {
     onAuthStateChanged(auth, (userData) => {
@@ -37,17 +37,20 @@ const FirebaseUserProvider: FC<{ children: ReactNode }> = ({ children }) => {
         setLoaded(true)
         return
       }
-      getSingleCollectionItem({ collectionId: 'users', id: userData.uid }).then((data) => {
+
+      onSnapshot(doc(db, 'users', userData.uid), (doc) => {
+        const data = doc.data() as UserEntity
+
         if (userData?.providerData[0].providerId === 'password') {
-          if (data) setUser(data as UserEntity)
+          if (data) setUser(data)
           setLoaded(true)
           return
         }
         setUser({
-          ...(data as UserEntity),
+          ...data,
           photo: userData.photoURL || undefined,
         })
-        if (data) setUser(data as UserEntity)
+        if (data) setUser(data)
         setLoaded(true)
       })
     })

@@ -27,7 +27,7 @@ const useCreateBoard = () => {
         boardName,
         description,
         lastEdit: convertFromDateObject(new Date()),
-        users: [{ name: user?.firstName || '', id: user?.id || '', creator: true }],
+        users: [{ name: user?.firstName || '', id: user?.id || '' }],
         requests: [],
       }
 

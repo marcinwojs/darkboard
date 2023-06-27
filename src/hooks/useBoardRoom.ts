@@ -33,7 +33,6 @@ const useBoardRoom = () => {
                 users: arrayUnion({
                   name: userData.firstName,
                   id: userData.id,
-                  creator: false,
                 }),
               },
             }).then(() => {
@@ -62,7 +61,6 @@ const useBoardRoom = () => {
                 users: arrayRemove({
                   name: userData.firstName,
                   id: userData.id,
-                  creator: false,
                 }),
               },
             }).then(() => {
@@ -90,17 +88,17 @@ const useBoardRoom = () => {
         const alreadyAskForAccess = boardData.requests.find(
           (existedRequest) => existedRequest.metaData.userId === requestData.metaData.userId,
         )
-        if (requestData.type === RequestTypes.access && boardData && alreadyAskForAccess){
+        if (requestData.type === RequestTypes.access && boardData && alreadyAskForAccess) {
           throw new Error('Already asked access request')
         }
 
-          return updateDocField({
-            collectionId: 'boards',
-            id: roomId,
-            data: {
-              requests: arrayUnion(request),
-            },
-          })
+        return updateDocField({
+          collectionId: 'boards',
+          id: roomId,
+          data: {
+            requests: arrayUnion(request),
+          },
+        })
       },
     )
   }

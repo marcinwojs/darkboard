@@ -8,13 +8,16 @@ import useConfirm from '../../../../shared/hooks/useConfirm'
 import { useNavigate } from 'react-router-dom'
 import React, { useState } from 'react'
 import { handleError } from '../../../../config/errorsMessages'
+import { BoardEntity } from './boardTable'
+import RequestsDialog from '../../../board/components/requestsDialog/requestsDialog'
 
 type Props = {
-  creatorId: string
+  board: BoardEntity
   userId: string
-  boardId: string
 }
-const ControlButtonsGroup = ({ userId, creatorId, boardId }: Props) => {
+
+const ControlButtonsGroup = ({ userId, board }: Props) => {
+  const { boardId, creatorId } = board
   const navigate = useNavigate()
   const [error, setError] = useState('')
   const confirmRemove = useConfirm({
@@ -49,6 +52,7 @@ const ControlButtonsGroup = ({ userId, creatorId, boardId }: Props) => {
       })
     }
   }
+
   const onLeaveBoard = async (id: string) => {
     const confirm = await confirmLeave()
 
@@ -67,9 +71,12 @@ const ControlButtonsGroup = ({ userId, creatorId, boardId }: Props) => {
         </TooltipButton>
         <ShareButton size={'small'} id={boardId} />
         {creatorId === userId ? (
-          <TooltipButton tipText={'Delete Board'} onClick={() => onRemoveBoard(boardId)}>
-            <DeleteForever fontSize={'small'} />
-          </TooltipButton>
+          <>
+            <RequestsDialog board={board} />
+            <TooltipButton tipText={'Delete Board'} onClick={() => onRemoveBoard(boardId)}>
+              <DeleteForever fontSize={'small'} />
+            </TooltipButton>
+          </>
         ) : (
           <TooltipButton tipText={'Remove me from Board'} onClick={() => onLeaveBoard(boardId)}>
             <Logout fontSize={'small'} />
