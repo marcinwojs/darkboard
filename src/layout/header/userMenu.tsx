@@ -4,6 +4,7 @@ import useAuthorization from '../../hooks/useAuthorization'
 import { useNavigate } from 'react-router-dom'
 import { MouseEvent, useState } from 'react'
 import { UserEntity } from '../../providers/firebaseUserProvider'
+import ProfileSettingsDialog from './profileSettingsDialog'
 
 type Props = {
   user: UserEntity
@@ -13,6 +14,7 @@ const UserProfileMenu = ({ user }: Props) => {
   const { logout } = useAuthorization()
   const navigate = useNavigate()
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null)
+  const [openSettings, setOpenSettings] = useState(false)
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null)
@@ -51,10 +53,14 @@ const UserProfileMenu = ({ user }: Props) => {
         open={Boolean(anchorElUser)}
         onClose={handleCloseUserMenu}
       >
+        <MenuItem onClick={() => setOpenSettings(true)}>
+          <Typography textAlign='center'>Profile Settings</Typography>
+        </MenuItem>
         <MenuItem onClick={onLogout}>
           <Typography textAlign='center'>Logout</Typography>
         </MenuItem>
       </Menu>
+      <ProfileSettingsDialog open={openSettings} handleClose={() => setOpenSettings(false)} />
     </>
   )
 }
