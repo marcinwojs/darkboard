@@ -1,12 +1,12 @@
 import { Stack } from '@mui/material'
 
 import React from 'react'
-import ProfilePictureInput from './profilePictureInput'
+import ProfilePhotoInput from './profilePhotoInput'
 
 const ProfileEdit = () => {
   return (
     <Stack justifyContent={'start'} alignItems={'start'}>
-      <ProfilePictureInput />
+      <ProfilePhotoInput />
     </Stack>
   )
 }

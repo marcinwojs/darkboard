@@ -45,7 +45,7 @@ const useFirestoreUser = () => {
     })
   }
 
-  const changeUserPortrait = (
+  const changeUserPhoto = (
     userId: string,
     file: File,
     onLoading: (loading: boolean) => void,
@@ -79,7 +79,7 @@ const useFirestoreUser = () => {
     )
   }
 
-  return { getUserData, updateUserData, addUser, getUserDataByEmail, changeUserPortrait }
+  return { getUserData, updateUserData, addUser, getUserDataByEmail, changeUserPhoto }
 }
 
 export default useFirestoreUser

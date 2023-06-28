@@ -1,4 +1,4 @@
-import { Badge, Box, CircularProgress, Stack, Typography } from '@mui/material'
+import { Badge, Box, CircularProgress, Snackbar, Stack, Typography } from '@mui/material'
 import TooltipButton from '../../../shared/components/tooltipButton/tooltipButton'
 import EditIcon from '@mui/icons-material/Edit'
 import Avatar from '@mui/material/Avatar'
@@ -38,22 +38,23 @@ const AvatarBadge = styled(Badge)(({ theme }) => ({
   },
 }))
 
-const ProfilePictureInput = () => {
+const ProfilePhotoInput = () => {
   const { user } = useUserContext()
-  const { changeUserPortrait } = useFirestoreUser()
+  const { changeUserPhoto } = useFirestoreUser()
   const uploadRef = React.useRef<HTMLInputElement>(null)
   const [progress, setProgress] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const UploadFile = () => {
     if (uploadRef.current?.files && user) {
       const file = uploadRef.current.files[0]
-      return changeUserPortrait(
+      return changeUserPhoto(
         user.id,
         file,
         (loadingState) => setWithTransition(() => setLoading(loadingState)),
         (progressState) => setProgress(progressState),
-        (error) => console.log(error.message),
+        (error) => setError(error.message),
       )
     }
   }
@@ -66,7 +67,7 @@ const ProfilePictureInput = () => {
     <div>
       <Stack justifyContent={'center'} alignItems={'center'}>
         <Typography mb={1} variant={'subtitle2'}>
-          Profile picture
+          Profile Photo
         </Typography>
         <AvatarBadge
           overlap='circular'
@@ -74,7 +75,7 @@ const ProfilePictureInput = () => {
           color={'primary'}
           badgeContent={
             !loading ? (
-              <TooltipButton onClick={handleClickEdit} tipText={'Change profile picture'}>
+              <TooltipButton onClick={handleClickEdit} tipText={'Change profile photo'}>
                 <EditIcon fontSize={'small'} />
               </TooltipButton>
             ) : null
@@ -99,9 +100,17 @@ const ProfilePictureInput = () => {
         name='file'
         ref={uploadRef}
         onChange={UploadFile}
+        accept={'image/*'}
+      />
+      <Snackbar
+        open={Boolean(error)}
+        onClose={() => setError('')}
+        autoHideDuration={2000}
+        anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
+        message={error}
       />
     </div>
   )
 }
 
-export default ProfilePictureInput
+export default ProfilePhotoInput
