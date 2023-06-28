@@ -7,6 +7,7 @@ export type UserEntity = {
   firstName: string
   id: string
   userBoards: string[]
+  photo?: string
 }
 
 const useFirestoreUser = () => {

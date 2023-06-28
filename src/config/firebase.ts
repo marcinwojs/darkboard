@@ -1,6 +1,8 @@
 import { initializeApp } from 'firebase/app'
 import { getAuth, GoogleAuthProvider, signInWithPopup, connectAuthEmulator } from 'firebase/auth'
 import { getFirestore, connectFirestoreEmulator } from 'firebase/firestore'
+import { getStorage, connectStorageEmulator } from 'firebase/storage'
+
 import {
   firebaseApiKey,
   firebaseAppId,
@@ -39,7 +41,9 @@ const db = getFirestore(app)
 connectFirestoreEmulator(db, 'localhost', 8080)
 const rdb = getDatabase(app)
 connectDatabaseEmulator(rdb, 'localhost', 9000)
+const str = getStorage(app)
+connectStorageEmulator(str, 'localhost', 9199)
 
-export { db, rdb, signInWithGoogle, auth }
+export { db, rdb, str, signInWithGoogle, auth }
 
 export default app

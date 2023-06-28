@@ -2,6 +2,9 @@ import { Box, Dialog, DialogContent, DialogTitle, IconButton, Tab, Tabs } from '
 import { Close } from '@mui/icons-material'
 import { useState } from 'react'
 import { styled } from '@mui/material/styles'
+import Avatar from '@mui/material/Avatar'
+import { UserEntity } from '../../../providers/firebaseUserProvider'
+import ProfileEdit from './profileEdit'
 
 const StyledTab = styled(Tab)({
   padding: '5px',
@@ -13,6 +16,7 @@ const StyledTab = styled(Tab)({
 type Props = {
   open: boolean
   handleClose: () => void
+  user: UserEntity
 }
 
 // TODO remove after created tabs content for user settings
@@ -60,13 +64,13 @@ const ProfileSettingsDialog = ({ open, handleClose }: Props) => {
             <StyledTab label='Password' />
             <StyledTab label='Other' />
           </Tabs>
-          <Box sx={{ flexGrow: 2 }} role='tabpanel' hidden={value !== 0}>
-            <Placeholder />
+          <Box sx={{ flexGrow: 2, minHeight: '200px', p:1 }} role='tabpanel' hidden={value !== 0}>
+            <ProfileEdit />
           </Box>
-          <Box sx={{ flexGrow: 2 }} role='tabpanel' hidden={value !== 1}>
+          <Box sx={{ flexGrow: 2, minHeight: '200px' }} role='tabpanel' hidden={value !== 1}>
             <Placeholder />
           </Box>{' '}
-          <Box sx={{ flexGrow: 2 }} role='tabpanel' hidden={value !== 2}>
+          <Box sx={{ flexGrow: 2, minHeight: '200px' }} role='tabpanel' hidden={value !== 2}>
             <Placeholder />
           </Box>
         </Box>
