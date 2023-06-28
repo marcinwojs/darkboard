@@ -1,6 +1,8 @@
 import useFirestore from './useFirestore'
 import { collection, doc, getDocs, query, updateDoc, where } from 'firebase/firestore'
-import { db } from '../config/firebase'
+import { db, str } from '../config/firebase'
+import { fetchImage, setWithTransition } from '../shared/helpers/helpers'
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage'
 
 export type UserEntity = {
   email: string
@@ -43,7 +45,41 @@ const useFirestoreUser = () => {
     })
   }
 
-  return { getUserData, updateUserData, addUser, getUserDataByEmail }
+  const changeUserPortrait = (
+    userId: string,
+    file: File,
+    onLoading: (loading: boolean) => void,
+    onProgress: (progress: number) => void,
+    onError: (error: Error) => void,
+  ) => {
+    const uploadTask = uploadBytesResumable(ref(str, userId), file)
+
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+        onProgress(progress)
+        if (snapshot.state === 'running') {
+          setWithTransition(() => onLoading(true))
+        }
+      },
+      (error) => {
+        onError(error)
+      },
+      async () => {
+        try {
+          const url = await getDownloadURL(uploadTask.snapshot.ref)
+          await updateUserData(userId, { photo: url })
+
+          fetchImage(url).then(() => setWithTransition(() => onLoading(false)))
+        } catch (e) {
+          onError(e as Error)
+        }
+      },
+    )
+  }
+
+  return { getUserData, updateUserData, addUser, getUserDataByEmail, changeUserPortrait }
 }
 
 export default useFirestoreUser

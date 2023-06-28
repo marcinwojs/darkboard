@@ -13,3 +13,16 @@ export const setWithTransition = (set: () => void) => {
     set()
   }
 }
+
+export const fetchImage = (url: string) => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+
+    img.onload = () => resolve(img)
+    img.onerror = () => reject(new Error('Image cannot be downloaded'))
+
+    img.src = url
+
+    return img
+  })
+}

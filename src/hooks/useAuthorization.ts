@@ -22,7 +22,7 @@ const UseAuthorization = () => {
         firstName: firstName,
         id: userCredential.user.uid,
         userBoards: [],
-        photo: undefined,
+        photo: '',
       }
       return addToDoc({
         collectionId: 'users',

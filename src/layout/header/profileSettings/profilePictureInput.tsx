@@ -5,8 +5,6 @@ import Avatar from '@mui/material/Avatar'
 import React, { useState } from 'react'
 import { useUserContext } from '../../../providers/firebaseUserProvider'
 import useFirestoreUser from '../../../hooks/useFirestoreUser'
-import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage'
-import { str } from '../../../config/firebase'
 import { setWithTransition } from '../../../shared/helpers/helpers'
 import { styled } from '@mui/material/styles'
 
@@ -41,61 +39,27 @@ const AvatarBadge = styled(Badge)(({ theme }) => ({
 }))
 
 const ProfilePictureInput = () => {
-  const { user, setUser } = useUserContext()
-  const { updateUserData } = useFirestoreUser()
+  const { user } = useUserContext()
+  const { changeUserPortrait } = useFirestoreUser()
   const uploadRef = React.useRef<HTMLInputElement>(null)
   const [progress, setProgress] = useState(0)
   const [loading, setLoading] = useState(false)
 
-  const fetchImage = (url: string) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image()
-
-      img.onload = () => resolve(img)
-      img.onerror = () => reject(new Error('Nie udało się załadować obrazka.'))
-
-      img.src = url
-    })
-  }
-
   const UploadFile = () => {
     if (uploadRef.current?.files && user) {
       const file = uploadRef.current.files[0]
-      const storageRef = ref(str, user?.id)
-      const uploadTask = uploadBytesResumable(storageRef, file)
-
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100
-          setProgress(progress)
-          switch (snapshot.state) {
-            case 'running':
-              setWithTransition(() => setLoading(true))
-              break
-          }
-        },
-        (error) => {
-          console.log(error)
-        },
-        () => {
-          getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
-            updateUserData(user.id, { photo: downloadURL }).then(() => {
-              fetchImage(downloadURL).then(() => {
-                setWithTransition(() => setLoading(false))
-                setUser({ ...user, photo: downloadURL })
-              })
-            })
-          })
-        },
+      return changeUserPortrait(
+        user.id,
+        file,
+        (loadingState) => setWithTransition(() => setLoading(loadingState)),
+        (progressState) => setProgress(progressState),
+        (error) => console.log(error.message),
       )
     }
   }
 
   const handleClickEdit = () => {
-    if (uploadRef.current) {
-      uploadRef.current.click()
-    }
+    if (uploadRef.current) uploadRef.current.click()
   }
 
   return (
@@ -116,7 +80,9 @@ const ProfilePictureInput = () => {
             ) : null
           }
         >
-          <Avatar alt={user?.firstName} src={user?.photo} />
+          <Avatar alt={user?.firstName} src={user?.photo}>
+            {user?.photo ? null : user?.firstName[0] || null}
+          </Avatar>
           {loading ? (
             <StyledMaskBox>
               <CircularProgress variant='determinate' value={55} size={71} />
