@@ -14,7 +14,7 @@ const UserProfileMenu = ({ user }: Props) => {
   const { logout } = useAuthorization()
   const navigate = useNavigate()
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null)
-  const [openSettings, setOpenSettings] = useState(true)
+  const [openSettings, setOpenSettings] = useState(false)
 
   const handleCloseUserMenu = () => {
     setAnchorElUser(null)
