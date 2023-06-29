@@ -21,6 +21,7 @@ import AddIcon from '@mui/icons-material/Add'
 import { BoardsTemplatesKeys, boardTemplates } from '../../../../templates/templates'
 import { useUserContext } from '../../../../providers/firebaseUserProvider'
 import { handleError } from '../../../../config/errorsMessages'
+import { LoadingButton } from '@mui/lab'
 
 type Props = {
   size?: ButtonProps['size']
@@ -39,6 +40,7 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
   const [error, setError] = useState('')
   const [open, setOpen] = useState(false)
   const [formState, setFormState] = useState<NewBoardProps>(initialFormState)
+  const [loading, setLoading] = useState(false)
   const { createBoard } = useCreateBoard()
   const boardTemplateList = Object.values(BoardsTemplatesKeys)
 
@@ -56,20 +58,24 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
 
   const handleClose = () => setOpen(false)
 
-  const onCreateBoard = () => {
-    createBoard(formState)
-      .then((id) => {
-        onSuccess && onSuccess()
-        navigate(`/board/${id}`)
-      })
-      .catch((error) => {
-        setError(handleError(error.code, error))
-      })
-  }
-
-  const onSubmit = (event: FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    onCreateBoard()
+
+    if (!loading) {
+      setLoading(true)
+
+      try {
+        const boardId = await createBoard(formState)
+
+        onSuccess && onSuccess()
+        navigate(`/board/${boardId}`)
+        setLoading(false)
+      } catch (e) {
+        const error = e as Error
+        setError(handleError(error.name, error))
+        setLoading(false)
+      }
+    }
   }
 
   return (
@@ -131,9 +137,9 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
             <Button variant={'contained'} onClick={handleClose}>
               Cancel
             </Button>
-            <Button variant={'contained'} type={'submit'} autoFocus>
+            <LoadingButton loading={loading} variant={'contained'} type={'submit'} autoFocus>
               Submit
-            </Button>
+            </LoadingButton>
           </DialogActions>
         </form>
       </Dialog>
