@@ -1,4 +1,4 @@
-import { AppBar, Box, Button, Container, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, Button, Container, Stack, Toolbar, Typography } from '@mui/material'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useUserContext } from '../../providers/firebaseUserProvider'
 import Logo from '../logo'
@@ -7,6 +7,7 @@ import { isCurrentPage } from '../../shared/utils'
 import { styled } from '@mui/material/styles'
 import UserProfileMenu from './userMenu'
 import DrawerMenu from './drawerMenu'
+import NotificationsMenu from './notifications/notificationsMenu'
 
 const HighlightTypography = styled(Typography)`
   font-weight: bold;
@@ -70,7 +71,10 @@ const Header = () => {
           </Box>
           <Box sx={{ flexGrow: 0 }}>
             {user ? (
-              <UserProfileMenu user={user} />
+              <Stack flexDirection={'row'}>
+                <NotificationsMenu />
+                <UserProfileMenu user={user} />
+              </Stack>
             ) : (
               <>
                 <Button
