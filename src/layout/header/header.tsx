@@ -7,7 +7,7 @@ import { isCurrentPage } from '../../shared/utils'
 import { styled } from '@mui/material/styles'
 import UserProfileMenu from './userMenu'
 import DrawerMenu from './drawerMenu'
-import NotificationsMenu from './notifications/notificationsMenu'
+import Notifications from './notifications/notifications'
 
 const HighlightTypography = styled(Typography)`
   font-weight: bold;
@@ -72,7 +72,7 @@ const Header = () => {
           <Box sx={{ flexGrow: 0 }}>
             {user ? (
               <Stack flexDirection={'row'}>
-                <NotificationsMenu />
+                <Notifications />
                 <UserProfileMenu user={user} />
               </Stack>
             ) : (
