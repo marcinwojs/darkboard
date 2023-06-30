@@ -141,7 +141,7 @@ const useBoardRoom = () => {
               type: NotificationTypes.request,
               message: `User ${user.firstName} (${user.email}) ask for access to board (${board.boardName})`,
             }
-            return createNotification(board.boardId, notificationData).then(
+            return createNotification(board.creatorId, notificationData).then(
               () => 'The owner of the board got a request for access',
             )
           })

@@ -15,6 +15,7 @@ export type NotificationEntity = NotificationData & {
   id: string
   requestId?: string
   date: string
+  isRead: boolean
 }
 
 const useNotifications = () => {
@@ -32,6 +33,7 @@ const useNotifications = () => {
       ...notificationData,
       id: uuidv4(),
       date: 'now',
+      isRead: false,
     }
 
     return updateDocField({
