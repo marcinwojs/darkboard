@@ -10,9 +10,8 @@ type Props = {
 
 const NotificationItem = ({ notification }: Props) => {
   const { date, message, type, isRead } = notification
-  const notificationDate = convertToObjectDate(date)
-  const relativeDate = getRelativeDate(notificationDate)
-  const specificDateTip = format(notificationDate, 'dd-LL-yyyy')
+  const relativeDate = getRelativeDate(date)
+  const specificDateTip = format(convertToObjectDate(date), 'dd-LL-yyyy')
 
   return (
     <ListItem sx={{ p: 1, pb: 0, position: 'relative' }}>

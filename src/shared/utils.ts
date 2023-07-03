@@ -9,12 +9,16 @@ const convertFromDateObject = (date: Date) => Timestamp.fromDate(date)
 const convertToObjectDate = (timeObject: { seconds: number; nanoseconds: number }) =>
   new Timestamp(timeObject.seconds, timeObject.nanoseconds).toDate()
 
-export const getRelativeDate = (date: Date, onlyMonths?: boolean) => {
+export const getRelativeDate = (
+  date: { seconds: number; nanoseconds: number },
+  onlyMonths?: boolean,
+) => {
+  const convertedDate = convertToObjectDate(date)
   const betweenDate = intervalToDuration({
-    end: date,
+    end: convertedDate,
     start: new Date(),
   })
-  const relativeDate = formatDistance(date, new Date())
+  const relativeDate = formatDistance(convertedDate, new Date())
 
   if (onlyMonths) {
     return betweenDate.years || 0 > 0 ? 'More then 12 months' : relativeDate

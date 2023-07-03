@@ -12,8 +12,7 @@ import {
 } from '@mui/material'
 import AvatarGroup from '../../../../shared/components/avatar/avatarGroup'
 import NewBoardForm from '../newBoardForm/newBoardForm'
-import moment from 'moment'
-import { convertToObjectDate } from '../../../../shared/utils'
+import { getRelativeDate } from '../../../../shared/utils'
 import { styled } from '@mui/material/styles'
 import { UserEntity } from '../../../../providers/firebaseUserProvider'
 import BoardInfoTooltipBtn from './boardInfoTooltipBtn'
@@ -75,7 +74,7 @@ const BoardTable = ({ boards, user }: Props) => {
                 <CenteredCell padding={'none'}>
                   <BoardInfoTooltipBtn
                     description={board.description}
-                    lastEdit={moment(convertToObjectDate(board.lastEdit)).fromNow()}
+                    lastEdit={getRelativeDate(board.lastEdit)}
                   />
                 </CenteredCell>
                 <CenteredCell>
