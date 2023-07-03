@@ -6,7 +6,6 @@ import {
   Fade,
   IconButton,
   List,
-  ListItem,
   Paper,
   Popper,
   Typography,
@@ -18,6 +17,7 @@ import { db } from '../../../config/firebase'
 import { NotificationEntity } from '../../../hooks/useNotifications'
 import { useUserContext } from '../../../providers/firebaseUserProvider'
 import ClearIcon from '@mui/icons-material/Clear'
+import NotificationItem from './notificationItem'
 
 const Notifications = () => {
   const { user } = useUserContext()
@@ -85,13 +85,11 @@ const Notifications = () => {
                   <ClearIcon />
                 </IconButton>
                 <Divider />
-                <List>
+                <List sx={{p:0}}>
                   {notifications.length ? (
-                    notifications.map(({ id, message }) => (
-                      <React.Fragment key={id}>
-                        <ListItem>
-                          <Typography fontSize={'small'}>{message}</Typography>
-                        </ListItem>
+                    notifications.map((notification) => (
+                      <React.Fragment key={notification.id}>
+                        <NotificationItem notification={notification} />
                         <Divider sx={{ mx: 1 }} />
                       </React.Fragment>
                     ))
