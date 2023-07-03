@@ -23,9 +23,11 @@ const NotificationItem = ({ notification }: Props) => {
         <Typography variant={'subtitle2'}>Title of notes</Typography>
         <Typography variant={'caption'}>{message}</Typography>
         <Stack flexDirection={'row'} sx={{ opacity: '75%', textTransform: 'capitalize' }}>
-          <Typography variant={'caption'}>{type} -</Typography>
+          <Typography variant={'caption'}>{`${type} - `}</Typography>
           <Tooltip title={specificDateTip}>
-            <Typography variant={'caption'}>{relativeDate} ago</Typography>
+            <Typography variant={'caption'} mx={1}>
+              {`${relativeDate} ago`}
+            </Typography>
           </Tooltip>
         </Stack>
       </Stack>

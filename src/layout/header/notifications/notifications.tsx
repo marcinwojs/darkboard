@@ -14,13 +14,14 @@ import NotificationsIcon from '@mui/icons-material/Notifications'
 import React, { useEffect, useState } from 'react'
 import { doc, onSnapshot } from 'firebase/firestore'
 import { db } from '../../../config/firebase'
-import { NotificationEntity } from '../../../hooks/useNotifications'
+import useNotifications, { NotificationEntity } from '../../../hooks/useNotifications'
 import { useUserContext } from '../../../providers/firebaseUserProvider'
 import ClearIcon from '@mui/icons-material/Clear'
 import NotificationItem from './notificationItem'
 
 const Notifications = () => {
   const { user } = useUserContext()
+  const { markAllAsRead } = useNotifications()
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const [notifications, setNotifications] = useState<NotificationEntity[]>([])
@@ -51,6 +52,7 @@ const Notifications = () => {
 
   const handleClose = () => {
     setAnchorEl(null)
+    markAllAsRead(user?.id || '', notifications)
   }
 
   return (
@@ -85,7 +87,7 @@ const Notifications = () => {
                   <ClearIcon />
                 </IconButton>
                 <Divider />
-                <List sx={{p:0}}>
+                <List sx={{ p: 0 }}>
                   {notifications.length ? (
                     notifications.map((notification) => (
                       <React.Fragment key={notification.id}>
