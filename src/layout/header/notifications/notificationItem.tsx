@@ -1,13 +1,18 @@
 import { NotificationEntity } from '../../../hooks/useNotifications'
-import { ListItem, Stack, Typography } from '@mui/material'
+import { ListItem, Stack, Tooltip, Typography } from '@mui/material'
 import LensIcon from '@mui/icons-material/Lens'
+import { convertToObjectDate, getRelativeDate } from '../../../shared/utils'
+import { format } from 'date-fns'
 
 type Props = {
   notification: NotificationEntity
 }
 
 const NotificationItem = ({ notification }: Props) => {
-  const { date, message, type, id, requestId, isRead } = notification
+  const { date, message, type, isRead } = notification
+  const notificationDate = convertToObjectDate(date)
+  const relativeDate = getRelativeDate(notificationDate)
+  const specificDateTip = format(notificationDate, 'dd-LL-yyyy')
 
   return (
     <ListItem sx={{ p: 1, pb: 0, position: 'relative' }}>
@@ -18,9 +23,12 @@ const NotificationItem = ({ notification }: Props) => {
         />
         <Typography variant={'subtitle2'}>Title of notes</Typography>
         <Typography variant={'caption'}>{message}</Typography>
-        <Typography variant={'caption'} sx={{ opacity: '75%', textTransform: 'capitalize' }}>
-          {type} - {date}
-        </Typography>
+        <Stack flexDirection={'row'} sx={{ opacity: '75%', textTransform: 'capitalize' }}>
+          <Typography variant={'caption'}>{type} -</Typography>
+          <Tooltip title={specificDateTip}>
+            <Typography variant={'caption'}>{relativeDate} ago</Typography>
+          </Tooltip>
+        </Stack>
       </Stack>
     </ListItem>
   )

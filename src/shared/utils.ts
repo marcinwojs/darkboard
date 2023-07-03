@@ -3,10 +3,25 @@ import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
 import { BinaryFiles } from '@excalidraw/excalidraw/types/types'
 import { matchPath } from 'react-router-dom'
 import { SerializedExcalidrawElement } from '../pages/board/components/excalidrawBoard/excalidrawBoard'
+import { formatDistance, intervalToDuration } from 'date-fns'
 const convertFromDateObject = (date: Date) => Timestamp.fromDate(date)
 
 const convertToObjectDate = (timeObject: { seconds: number; nanoseconds: number }) =>
   new Timestamp(timeObject.seconds, timeObject.nanoseconds).toDate()
+
+export const getRelativeDate = (date: Date, onlyMonths?: boolean) => {
+  const betweenDate = intervalToDuration({
+    end: date,
+    start: new Date(),
+  })
+  const relativeDate = formatDistance(date, new Date())
+
+  if (onlyMonths) {
+    return betweenDate.years || 0 > 0 ? 'More then 12 months' : relativeDate
+  }
+
+  return relativeDate
+}
 
 export { convertToObjectDate, convertFromDateObject }
 
