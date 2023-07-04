@@ -74,7 +74,7 @@ const BoardTable = ({ boards, user }: Props) => {
                 <CenteredCell padding={'none'}>
                   <BoardInfoTooltipBtn
                     description={board.description}
-                    lastEdit={getRelativeDate(board.lastEdit)}
+                    lastEdit={getRelativeDate({ date: board.lastEdit })}
                   />
                 </CenteredCell>
                 <CenteredCell>

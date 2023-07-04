@@ -52,7 +52,7 @@ const Notifications = () => {
 
   const handleClose = () => {
     setAnchorEl(null)
-    markAllAsRead(user?.id || '', notifications)
+    if (user) markAllAsRead(user.id, notifications)
   }
 
   return (
