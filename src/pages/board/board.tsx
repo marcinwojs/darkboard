@@ -55,7 +55,7 @@ const Board = () => {
     }
   }, [loaded, error])
 
-  if (!loaded || !boardData || !user || !initData) {
+  if (!loaded || !boardData || !user) {
     return (
       <Stack m={10} spacing={2}>
         <Typography textAlign={'center'}>Loading...</Typography>
