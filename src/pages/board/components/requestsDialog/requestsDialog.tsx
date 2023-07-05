@@ -26,7 +26,7 @@ type Props = {
 
 const RequestsDialog = ({ mobile = false, requests, boardId }: Props) => {
   const [open, setOpen] = useState(false)
-  const { joinRoom, removeRequest } = useBoardRoom()
+  const { acceptAccessRequest, removeRequest } = useBoardRoom()
   const { getUserData } = useFirestoreUser()
 
   const handleClickOpen = () => {
@@ -104,7 +104,7 @@ const RequestsDialog = ({ mobile = false, requests, boardId }: Props) => {
                       </Typography>
                       <Box px={3}>
                         <Button
-                          // onClick={() => acceptAccessRequest(request.metaData.userId, request)}
+                          onClick={() => acceptAccessRequest(boardId, request.id, request.metaData)}
                           sx={{ mr: 4 }}
                           size={'small'}
                           color={'success'}
@@ -113,7 +113,7 @@ const RequestsDialog = ({ mobile = false, requests, boardId }: Props) => {
                           Accept
                         </Button>
                         <Button
-                          // onClick={() => removeRequest(boardId, request)}
+                          onClick={() => removeRequest(boardId, request.id)}
                           size={'small'}
                           color={'error'}
                           variant={'contained'}

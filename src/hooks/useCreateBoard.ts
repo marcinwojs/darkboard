@@ -46,6 +46,8 @@ const useCreateBoard = () => {
     const sfRef1 = doc(db, `boards/${instanceId}`, 'boardContent/files')
     batch.set(sfRef1, { files: boardsContent.files })
 
+
+
     const userData = await getUserData(user?.id || '')
 
     const userRef = doc(db, 'users', user?.id || '')

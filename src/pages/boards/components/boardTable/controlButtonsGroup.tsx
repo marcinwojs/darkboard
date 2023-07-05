@@ -10,7 +10,7 @@ import React, { useEffect, useState } from 'react'
 import { handleError } from '../../../../config/errorsMessages'
 import { BoardEntity } from './boardTable'
 import RequestsDialog from '../../../board/components/requestsDialog/requestsDialog'
-import { collection, onSnapshot, query, where } from 'firebase/firestore'
+import { collection, onSnapshot, query } from 'firebase/firestore'
 import { db } from '../../../../config/firebase'
 
 type Props = {
@@ -74,7 +74,7 @@ const ControlButtonsGroup = ({ userId, board }: Props) => {
       querySnapshot.forEach((doc) => {
         boardRequests.push(doc.data() as AccessRequestEntity)
       })
-      setRequests([])
+      setRequests(boardRequests)
     })
   }, [])
 

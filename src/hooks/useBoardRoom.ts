@@ -4,6 +4,7 @@ import {
   arrayRemove,
   arrayUnion,
   collection,
+  deleteDoc,
   doc,
   getDocs,
   query,
@@ -46,36 +47,22 @@ const useBoardRoom = () => {
   const { updateUserData, getUserData } = useFirestoreUser()
   const { updateDocField, getSingleCollectionItem } = useFirestore()
 
-  const joinRoom = (board: BoardEntity, userId: string) => {
-    const alreadyInBoard = board.users.find((user: { id: string }) => user.id === userId)
+  const joinRoom = async (boardId: string, userId: string) => {
+    const { id, firstName } = await getUserData(userId)
 
-    return new Promise((resolve, reject) => {
-      if (alreadyInBoard) {
-        return resolve(true)
-      } else {
-        return getUserData(userId)
-          .then((userData) => {
-            return updateDocField({
-              collectionId: 'boards',
-              id: board.boardId,
-              data: {
-                ...board,
-                users: arrayUnion({
-                  name: userData.firstName,
-                  id: userData.id,
-                }),
-              },
-            }).then(() => {
-              return updateUserData(userId, {
-                userBoards: [...userData.userBoards, board.boardId],
-              })
-                .then(() => resolve(board))
-                .catch(() => reject(new Error('No data found')))
-            })
-          })
-          .catch(() => reject(new Error('No data found')))
-      }
-    })
+    if (id) {
+      const batch = writeBatch(db)
+
+      const nycRef = doc(db, `boards/${boardId}`)
+      batch.update(nycRef, { users: arrayUnion({ id, name: firstName }) })
+
+      const boardCreator = doc(db, `users/${userId}`)
+      batch.update(boardCreator, { userBoards: arrayUnion(boardId) })
+
+      return await batch.commit().then(() => 'The owner of the board got a request for access')
+    } else {
+      throw new Error('error')
+    }
   }
 
   const leaveRoom = (roomId: string, userId: string) => {
@@ -167,12 +154,23 @@ const useBoardRoom = () => {
     }
   }
 
-  const removeRequest = (boardId: string, removedRequest: AccessRequestEntity) => {
-    return updateDocField({
-      id: boardId,
-      collectionId: 'boards',
-      data: { requests: arrayRemove(removedRequest) },
-    })
+  const acceptAccessRequest = async (
+    boardId: string,
+    requestId: string,
+    userData: {
+      userId: string
+      userName: string
+    },
+  ) => {
+    try {
+      await joinRoom(boardId, userData.userId).then(() => removeRequest(boardId, requestId))
+    } catch (exceptionVar) {
+      console.log('fail')
+    }
+  }
+
+  const removeRequest = (boardId: string, requestId: string) => {
+    return deleteDoc(doc(db, `boards/${boardId}/requests`, requestId))
   }
 
   return {
@@ -181,6 +179,7 @@ const useBoardRoom = () => {
     getBoardElements,
     getBoardFiles,
     createAccessRequest,
+    acceptAccessRequest,
     removeRequest,
   }
 }
