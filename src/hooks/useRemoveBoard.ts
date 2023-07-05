@@ -5,8 +5,8 @@ const useRemoveBoard = () => {
   const removeBoard = async (userId: string, boardId: string) => {
     const batch = writeBatch(db)
 
-    const nycRef = doc(db, `boards/${boardId}`)
-    batch.delete(nycRef)
+    const boardRef = doc(db, `boards/${boardId}`)
+    batch.delete(boardRef)
 
     const boardCreator = doc(db, `users/${userId}`)
     batch.update(boardCreator, { userBoards: arrayRemove(boardId) })

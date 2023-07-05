@@ -1,7 +1,7 @@
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth'
-import { auth } from '../config/firebase'
-import useFirestore from './useFirestore'
+import { auth, db } from '../config/firebase'
 import { UserEntity } from './useFirestoreUser'
+import { doc, writeBatch } from 'firebase/firestore'
 
 type SignIn = {
   email: string
@@ -13,10 +13,9 @@ type SignUp = SignIn & {
 }
 
 const UseAuthorization = () => {
-  const { addToDoc } = useFirestore()
   const signIn = ({ email, password }: SignIn) => signInWithEmailAndPassword(auth, email, password)
-  const signUp = ({ email, password, firstName }: SignUp) => {
-    return createUserWithEmailAndPassword(auth, email, password).then((userCredential) => {
+  const signUp = async ({ email, password, firstName }: SignUp) => {
+    return createUserWithEmailAndPassword(auth, email, password).then(async (userCredential) => {
       const data: UserEntity = {
         email: email,
         firstName: firstName,
@@ -24,17 +23,16 @@ const UseAuthorization = () => {
         userBoards: [],
         photo: '',
       }
-      return addToDoc({
-        collectionId: 'users',
-        data,
-        id: data.id,
-      }).then(() => {
-        return addToDoc({
-          collectionId: 'notifications',
-          id: userCredential.user.uid,
-          data: { notifications: [] },
-        })
-      })
+
+      const batch = writeBatch(db)
+
+      const newUserRef = doc(db, `users/${data.id}`)
+      batch.set(newUserRef, data)
+
+      const newNotificationsRef = doc(db, `notifications/${data.id}`)
+      batch.set(newNotificationsRef, { notifications: [] })
+
+      return await batch.commit()
     })
   }
 

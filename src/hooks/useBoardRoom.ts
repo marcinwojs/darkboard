@@ -19,6 +19,7 @@ import { convertFromDateObject } from '../shared/utils'
 import { NotificationTypes } from './useNotifications'
 import { UserEntity } from '../providers/firebaseUserProvider'
 import { db } from '../config/firebase'
+import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
 
 export type BoardContentEntity = {
   elements: SerializedExcalidrawElement[]
@@ -44,8 +45,8 @@ type RequestBase = {
 export type AccessRequestEntity = AccessRequestData & RequestBase
 
 const useBoardRoom = () => {
-  const { updateUserData, getUserData } = useFirestoreUser()
-  const { updateDocField, getSingleCollectionItem } = useFirestore()
+  const { getUserData } = useFirestoreUser()
+  const { getSingleCollectionItem } = useFirestore()
 
   const joinRoom = async (boardId: string, userId: string) => {
     const { id, firstName } = await getUserData(userId)
@@ -53,11 +54,11 @@ const useBoardRoom = () => {
     if (id) {
       const batch = writeBatch(db)
 
-      const nycRef = doc(db, `boards/${boardId}`)
-      batch.update(nycRef, { users: arrayUnion({ id, name: firstName }) })
+      const boardRef = doc(db, `boards/${boardId}`)
+      batch.update(boardRef, { users: arrayUnion({ id, name: firstName }) })
 
-      const boardCreator = doc(db, `users/${userId}`)
-      batch.update(boardCreator, { userBoards: arrayUnion(boardId) })
+      const newBoardUserRef = doc(db, `users/${userId}`)
+      batch.update(newBoardUserRef, { userBoards: arrayUnion(boardId) })
 
       return await batch.commit().then(() => 'The owner of the board got a request for access')
     } else {
@@ -68,11 +69,11 @@ const useBoardRoom = () => {
   const leaveRoom = async (boardId: string, userData: { id: string; name: string }) => {
     const batch = writeBatch(db)
 
-    const nycRef = doc(db, `boards/${boardId}`)
-    batch.update(nycRef, { users: arrayRemove(userData) })
+    const boardRef = doc(db, `boards/${boardId}`)
+    batch.update(boardRef, { users: arrayRemove(userData) })
 
-    const boardCreator = doc(db, `users/${userData.id}`)
-    batch.update(boardCreator, { userBoards: arrayRemove(boardId) })
+    const userRef = doc(db, `users/${userData.id}`)
+    batch.update(userRef, { userBoards: arrayRemove(boardId) })
 
     return await batch.commit().then(() => 'The owner of the board got a request for access')
   }
@@ -81,17 +82,26 @@ const useBoardRoom = () => {
     return getSingleCollectionItem<{ elements: BoardContentEntity['elements'] }>({
       collectionId: `boards/${boardId}/boardContent`,
       id: 'elements',
-    }).then(({ elements }) => {
-      return elements
-    })
+    }).then(({ elements }) => elements)
   }
+
   const getBoardFiles = (boardId: string) => {
     return getSingleCollectionItem<{ files: BoardContentEntity['files'] }>({
       collectionId: `boards/${boardId}/boardContent`,
       id: 'files',
-    }).then(({ files }) => {
-      return files
-    })
+    }).then(({ files }) => files)
+  }
+
+  const getInitialData = (
+    boardId: string,
+  ): Promise<{ files: BinaryFiles; elements: ExcalidrawElement[] }> => {
+    const elements = getBoardElements(boardId)
+    const files = getBoardFiles(boardId)
+
+    return Promise.all([elements, files]).then((data) => ({
+      elements: data[0],
+      files: data[1],
+    }))
   }
 
   const createAccessRequest = async (
@@ -128,17 +138,17 @@ const useBoardRoom = () => {
     } else {
       const batch = writeBatch(db)
 
-      const nycRef = doc(db, `boards/${boardId}/requests/${requestId}`)
-      batch.set(nycRef, request)
+      const requestRef = doc(db, `boards/${boardId}/requests/${requestId}`)
+      batch.set(requestRef, request)
 
-      const boardCreator = doc(db, `notifications/${creatorId}`)
-      batch.update(boardCreator, { notifications: arrayUnion(notification) })
+      const notificationsRef = doc(db, `notifications/${creatorId}`)
+      batch.update(notificationsRef, { notifications: arrayUnion(notification) })
 
       return await batch.commit().then(() => 'The owner of the board got a request for access')
     }
   }
 
-  const acceptAccessRequest = async (
+  const acceptAccessRequest = (
     boardId: string,
     requestId: string,
     userData: {
@@ -146,11 +156,7 @@ const useBoardRoom = () => {
       userName: string
     },
   ) => {
-    try {
-      await joinRoom(boardId, userData.userId).then(() => removeRequest(boardId, requestId))
-    } catch (exceptionVar) {
-      console.log('fail')
-    }
+    joinRoom(boardId, userData.userId).then(() => removeRequest(boardId, requestId))
   }
 
   const removeRequest = (boardId: string, requestId: string) => {
@@ -161,6 +167,7 @@ const useBoardRoom = () => {
     joinRoom,
     leaveRoom,
     getBoardElements,
+    getInitialData,
     getBoardFiles,
     createAccessRequest,
     acceptAccessRequest,

@@ -1,6 +1,7 @@
 import useFirestore from './useFirestore'
 import { v4 as uuidv4 } from 'uuid'
 import { arrayUnion } from 'firebase/firestore'
+import { convertFromDateObject } from '../shared/utils'
 
 export enum NotificationTypes {
   request = 'request',
@@ -14,7 +15,7 @@ export type NotificationData = {
 export type NotificationEntity = NotificationData & {
   id: string
   requestId?: string
-  date: string
+  date: { seconds: number; nanoseconds: number }
   isRead: boolean
 }
 
@@ -32,7 +33,7 @@ const useNotifications = () => {
     const notification: NotificationEntity = {
       ...notificationData,
       id: uuidv4(),
-      date: 'now',
+      date: convertFromDateObject(new Date()),
       isRead: false,
     }
 
@@ -43,7 +44,20 @@ const useNotifications = () => {
     })
   }
 
-  return { createNotification, getNotificationsList }
+  const markAllAsRead = async (userId: string, notifications: NotificationEntity[]) => {
+    const readNotifications = notifications.map((notification) => ({
+      ...notification,
+      isRead: true,
+    }))
+
+    return updateDocField({
+      collectionId: 'notifications',
+      id: userId,
+      data: { notifications: readNotifications },
+    })
+  }
+
+  return { createNotification, getNotificationsList, markAllAsRead }
 }
 
 export default useNotifications

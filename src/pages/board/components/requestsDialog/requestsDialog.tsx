@@ -13,10 +13,8 @@ import {
 } from '@mui/material'
 import { useRef, useState } from 'react'
 import TooltipButton from '../../../../shared/components/tooltipButton/tooltipButton'
-import { BoardEntity } from '../../../boards/components/boardTable/boardTable'
 import { Close, LocalPostOffice } from '@mui/icons-material'
 import useBoardRoom, { AccessRequestEntity } from '../../../../hooks/useBoardRoom'
-import useFirestoreUser from '../../../../hooks/useFirestoreUser'
 
 type Props = {
   mobile?: boolean
@@ -27,7 +25,6 @@ type Props = {
 const RequestsDialog = ({ mobile = false, requests, boardId }: Props) => {
   const [open, setOpen] = useState(false)
   const { acceptAccessRequest, removeRequest } = useBoardRoom()
-  const { getUserData } = useFirestoreUser()
 
   const handleClickOpen = () => {
     setOpen(true)
@@ -35,21 +32,6 @@ const RequestsDialog = ({ mobile = false, requests, boardId }: Props) => {
 
   const handleClose = () => setOpen(false)
   const ref = useRef<HTMLDivElement>(null)
-
-  // TODO change accept request
-  // const acceptAccessRequest = async (userId: string, request: AccessRequestEntity) => {
-  //   try {
-  //     await getUserData(userId).then((d) =>
-  //       joinRoom(board, d.id).then(() =>
-  //         removeRequest(boardId, request).then(() => {
-  //           console.log('success')
-  //         }),
-  //       ),
-  //     )
-  //   } catch (exceptionVar) {
-  //     console.log('fail')
-  //   }
-  // }
 
   return (
     <div>

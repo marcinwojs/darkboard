@@ -19,7 +19,7 @@ const Board = () => {
   const [allowJoin, setAllowJoin] = useState(false)
   const [error, setError] = useState('')
   const { user } = useUserContext()
-  const { getBoardElements, getBoardFiles } = useBoardRoom()
+  const { getInitialData } = useBoardRoom()
   const instanceId = useParams()?.boardId as string
   const navigate = useNavigate()
 
@@ -33,8 +33,8 @@ const Board = () => {
           const accessToBoard = user.userBoards.includes(board.boardId)
 
           if (accessToBoard) {
-            getBoardElements(instanceId).then((elements) => {
-              getBoardFiles(instanceId).then((files) => setInitData({ elements, files }))
+            getInitialData(instanceId).then(({ files, elements }) => {
+              setInitData({ files, elements })
             })
           }
 

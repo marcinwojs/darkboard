@@ -26,8 +26,6 @@ type Props = {
 }
 
 const useBoardUpdates = ({ instanceId }: Props) => {
-  const { updateDocField } = useFirestore()
-
   const updatePointerPosition = (user: UserEntity, payload: UpdatePointerPositionPayload) => {
     update(ref(rdb, `pointer-update/${instanceId}`), {
       [`${user?.id}`]: {
@@ -65,7 +63,7 @@ const useBoardUpdates = ({ instanceId }: Props) => {
 
     update(ref(rdb, `board-update/${instanceId}`), { elements: diffElements })
 
-    return await batch.commit()
+    await batch.commit()
   }
 
   const handleUpdateBoardElements = (callback: (newElements: ExcalidrawElement[]) => void) => {

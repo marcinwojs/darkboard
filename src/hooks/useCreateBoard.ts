@@ -34,19 +34,16 @@ const useCreateBoard = () => {
       files: {},
     }
 
-    const batch = writeBatch(db);
+    const batch = writeBatch(db)
 
+    const newBoardRef = doc(db, `boards/${instanceId}`)
+    batch.set(newBoardRef, data)
 
-    const nycRef = doc(db, `boards/${instanceId}`)
-    batch.set(nycRef, data)
+    const elementsRef = doc(db, `boards/${instanceId}`, 'boardContent/elements')
+    batch.set(elementsRef, { elements: boardsContent.elements })
 
-    const sfRef = doc(db, `boards/${instanceId}`, 'boardContent/elements')
-    batch.set(sfRef, { elements: boardsContent.elements })
-
-    const sfRef1 = doc(db, `boards/${instanceId}`, 'boardContent/files')
-    batch.set(sfRef1, { files: boardsContent.files })
-
-
+    const filesRef = doc(db, `boards/${instanceId}`, 'boardContent/files')
+    batch.set(filesRef, { files: boardsContent.files })
 
     const userData = await getUserData(user?.id || '')
 
