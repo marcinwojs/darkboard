@@ -32,7 +32,6 @@ const AskAccessView = ({ board, user }: Props) => {
       if (error instanceof Error) {
         setResponse(error.message)
       }
-      setResponse('Unexpected Error')
     }
   }
 

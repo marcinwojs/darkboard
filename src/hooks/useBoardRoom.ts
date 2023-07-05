@@ -1,13 +1,23 @@
 import useFirestoreUser from './useFirestoreUser'
 import useFirestore from './useFirestore'
-import { arrayRemove, arrayUnion } from 'firebase/firestore'
+import {
+  arrayRemove,
+  arrayUnion,
+  collection,
+  doc,
+  getDocs,
+  query,
+  where,
+  writeBatch,
+} from 'firebase/firestore'
 import { BoardEntity } from '../pages/boards/components/boardTable/boardTable'
 import { SerializedExcalidrawElement } from '../pages/board/components/excalidrawBoard/excalidrawBoard'
 import { BinaryFiles } from '@excalidraw/excalidraw/types/types'
 import { v4 as uuidv4 } from 'uuid'
 import { convertFromDateObject } from '../shared/utils'
-import useNotifications, { NotificationTypes } from './useNotifications'
+import { NotificationTypes } from './useNotifications'
 import { UserEntity } from '../providers/firebaseUserProvider'
+import { db } from '../config/firebase'
 
 export type BoardContentEntity = {
   elements: SerializedExcalidrawElement[]
@@ -35,7 +45,6 @@ export type AccessRequestEntity = AccessRequestData & RequestBase
 const useBoardRoom = () => {
   const { updateUserData, getUserData } = useFirestoreUser()
   const { updateDocField, getSingleCollectionItem } = useFirestore()
-  const { createNotification } = useNotifications()
 
   const joinRoom = (board: BoardEntity, userId: string) => {
     const alreadyInBoard = board.users.find((user: { id: string }) => user.id === userId)
@@ -114,11 +123,12 @@ const useBoardRoom = () => {
     })
   }
 
-  const createAccessRequest = (
+  const createAccessRequest = async (
     board: BoardEntity,
     user: UserEntity,
     requestData: AccessRequestData,
   ) => {
+    const { boardId, boardName, creatorId } = board
     const requestId = uuidv4()
     const currentDate = convertFromDateObject(new Date())
     const request: AccessRequestEntity = {
@@ -126,35 +136,35 @@ const useBoardRoom = () => {
       id: requestId,
       date: currentDate,
     }
+    const notification = {
+      type: NotificationTypes.request,
+      message: `User ${user.firstName} (${user.email}) ask for access to board (${boardName})`,
+      id: uuidv4(),
+      date: convertFromDateObject(new Date()),
+      isRead: false,
+    }
 
-    return getSingleCollectionItem<BoardEntity>({ id: board.boardId, collectionId: 'boards' }).then(
-      (boardData) => {
-        const alreadyAskForAccess = boardData.requests.find(
-          (existedRequest) => existedRequest.metaData.userId === requestData.metaData.userId,
-        )
-        if (requestData.type === RequestTypes.access && boardData && alreadyAskForAccess) {
-          throw new Error('Already asked access request')
-        }
-
-        return updateDocField({
-          collectionId: 'boards',
-          id: board.boardId,
-          data: {
-            requests: arrayUnion(request),
-          },
-        })
-          .then(() => {
-            const notificationData = {
-              type: NotificationTypes.request,
-              message: `User ${user.firstName} (${user.email}) ask for access to board (${board.boardName})`,
-            }
-            return createNotification(board.creatorId, notificationData).then(
-              () => 'The owner of the board got a request for access',
-            )
-          })
-          .catch((reason) => reason.message || 'we could not send a request for access')
-      },
+    const q = query(
+      collection(db, `boards/${boardId}/requests`),
+      where('metaData.userId', '==', user.id),
     )
+    const querySnapshot = await getDocs(q)
+
+    const alreadyCreatedAccess = Boolean(querySnapshot.size)
+
+    if (alreadyCreatedAccess) {
+      throw new Error('Already asked access request')
+    } else {
+      const batch = writeBatch(db)
+
+      const nycRef = doc(db, `boards/${boardId}/requests/${requestId}`)
+      batch.set(nycRef, request)
+
+      const boardCreator = doc(db, `notifications/${creatorId}`)
+      batch.update(boardCreator, { notifications: arrayUnion(notification) })
+
+      return await batch.commit().then(() => 'The owner of the board got a request for access')
+    }
   }
 
   const removeRequest = (boardId: string, removedRequest: AccessRequestEntity) => {

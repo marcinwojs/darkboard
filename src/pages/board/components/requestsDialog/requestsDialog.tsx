@@ -20,11 +20,11 @@ import useFirestoreUser from '../../../../hooks/useFirestoreUser'
 
 type Props = {
   mobile?: boolean
-  board: BoardEntity
+  boardId: string
+  requests: AccessRequestEntity[]
 }
 
-const RequestsDialog = ({ mobile = false, board }: Props) => {
-  const requests = board.requests
+const RequestsDialog = ({ mobile = false, requests, boardId }: Props) => {
   const [open, setOpen] = useState(false)
   const { joinRoom, removeRequest } = useBoardRoom()
   const { getUserData } = useFirestoreUser()
@@ -37,19 +37,19 @@ const RequestsDialog = ({ mobile = false, board }: Props) => {
   const ref = useRef<HTMLDivElement>(null)
 
   // TODO change accept request
-  const acceptAccessRequest = async (userId: string, request: AccessRequestEntity) => {
-    try {
-      await getUserData(userId).then((d) =>
-        joinRoom(board, d.id).then(() =>
-          removeRequest(board.boardId, request).then(() => {
-            console.log('success')
-          }),
-        ),
-      )
-    } catch (exceptionVar) {
-      console.log('fail')
-    }
-  }
+  // const acceptAccessRequest = async (userId: string, request: AccessRequestEntity) => {
+  //   try {
+  //     await getUserData(userId).then((d) =>
+  //       joinRoom(board, d.id).then(() =>
+  //         removeRequest(boardId, request).then(() => {
+  //           console.log('success')
+  //         }),
+  //       ),
+  //     )
+  //   } catch (exceptionVar) {
+  //     console.log('fail')
+  //   }
+  // }
 
   return (
     <div>
@@ -104,7 +104,7 @@ const RequestsDialog = ({ mobile = false, board }: Props) => {
                       </Typography>
                       <Box px={3}>
                         <Button
-                          onClick={() => acceptAccessRequest(request.metaData.userId, request)}
+                          // onClick={() => acceptAccessRequest(request.metaData.userId, request)}
                           sx={{ mr: 4 }}
                           size={'small'}
                           color={'success'}
@@ -113,7 +113,7 @@ const RequestsDialog = ({ mobile = false, board }: Props) => {
                           Accept
                         </Button>
                         <Button
-                          onClick={() => removeRequest(board.boardId, request)}
+                          // onClick={() => removeRequest(boardId, request)}
                           size={'small'}
                           color={'error'}
                           variant={'contained'}

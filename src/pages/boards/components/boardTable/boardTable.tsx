@@ -18,7 +18,6 @@ import { styled } from '@mui/material/styles'
 import { UserEntity } from '../../../../providers/firebaseUserProvider'
 import BoardInfoTooltipBtn from './boardInfoTooltipBtn'
 import ControlButtonsGroup from './controlButtonsGroup'
-import { AccessRequestEntity } from '../../../../hooks/useBoardRoom'
 
 const CenteredCell = styled(TableCell)(() => ({
   textAlign: 'center',
@@ -32,7 +31,6 @@ type UserBoardEntity = {
 export type BoardEntity = {
   boardId: string
   boardName: string
-  requests: AccessRequestEntity[]
   description: string
   creatorId: string
   lastEdit: { seconds: number; nanoseconds: number }
@@ -84,7 +82,7 @@ const BoardTable = ({ boards, user }: Props) => {
                   <AvatarGroup users={board.users} creatorId={board.creatorId} />
                 </CenteredCell>
                 <CenteredCell padding={'none'}>
-                  {/* <ControlButtonsGroup board={board} userId={user.id} /> */}
+                  <ControlButtonsGroup board={board} userId={user.id} />
                 </CenteredCell>
               </TableRow>
             ))}

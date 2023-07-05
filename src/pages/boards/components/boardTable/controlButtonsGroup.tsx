@@ -3,13 +3,15 @@ import TooltipButton from '../../../../shared/components/tooltipButton/tooltipBu
 import ShareButton from '../../../board/components/shareButton/shareButton'
 import { DeleteForever, Logout, Login } from '@mui/icons-material'
 import useRemoveBoard from '../../../../hooks/useRemoveBoard'
-import useBoardRoom from '../../../../hooks/useBoardRoom'
+import useBoardRoom, { AccessRequestEntity } from '../../../../hooks/useBoardRoom'
 import useConfirm from '../../../../shared/hooks/useConfirm'
 import { useNavigate } from 'react-router-dom'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { handleError } from '../../../../config/errorsMessages'
 import { BoardEntity } from './boardTable'
 import RequestsDialog from '../../../board/components/requestsDialog/requestsDialog'
+import { collection, onSnapshot, query, where } from 'firebase/firestore'
+import { db } from '../../../../config/firebase'
 
 type Props = {
   board: BoardEntity
@@ -20,6 +22,7 @@ const ControlButtonsGroup = ({ userId, board }: Props) => {
   const { boardId, creatorId } = board
   const navigate = useNavigate()
   const [error, setError] = useState('')
+  const [requests, setRequests] = useState<AccessRequestEntity[]>([])
   const confirmRemove = useConfirm({
     title: 'Delete board',
     body: 'Are you sure you want to delete this board? This action will permanently remove the board you created and remove it from all participants lists.',
@@ -63,6 +66,18 @@ const ControlButtonsGroup = ({ userId, board }: Props) => {
     }
   }
 
+  useEffect(() => {
+    const q = query(collection(db, `boards/${boardId}/requests`))
+    onSnapshot(q, (querySnapshot) => {
+      const boardRequests: AccessRequestEntity[] = []
+
+      querySnapshot.forEach((doc) => {
+        boardRequests.push(doc.data() as AccessRequestEntity)
+      })
+      setRequests([])
+    })
+  }, [])
+
   return (
     <>
       <Stack direction={'row'}>
@@ -75,7 +90,7 @@ const ControlButtonsGroup = ({ userId, board }: Props) => {
             <TooltipButton tipText={'Delete Board'} onClick={() => onRemoveBoard(boardId)}>
               <DeleteForever fontSize={'small'} />
             </TooltipButton>
-            <RequestsDialog board={board} />
+            <RequestsDialog requests={requests} boardId={board.boardId} />
           </>
         ) : (
           <TooltipButton tipText={'Remove me from Board'} onClick={() => onLeaveBoard(boardId)}>
