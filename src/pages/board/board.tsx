@@ -33,8 +33,9 @@ const Board = () => {
           const accessToBoard = user.userBoards.includes(board.boardId)
 
           if (accessToBoard) {
-            getBoardElements(instanceId).then((elements) => setInitData({ elements }))
-            getBoardFiles(instanceId).then((files) => setInitData({ ...initData, files }))
+            getBoardElements(instanceId).then((elements) => {
+              getBoardFiles(instanceId).then((files) => setInitData({ elements, files }))
+            })
           }
 
           setAllowJoin(accessToBoard)
@@ -56,17 +57,17 @@ const Board = () => {
     }
   }, [loaded, error])
 
-  if (!loaded || !boardData || !user) {
+  if (loaded && !allowJoin && boardData && user) {
+    return <AskAccessView board={boardData} user={user} />
+  }
+
+  if (!loaded || !boardData || !user || !initData) {
     return (
       <Stack m={10} spacing={2}>
         <Typography textAlign={'center'}>Loading...</Typography>
         <LinearProgress />
       </Stack>
     )
-  }
-
-  if (loaded && !allowJoin) {
-    return <AskAccessView board={boardData} user={user} />
   }
 
   return (

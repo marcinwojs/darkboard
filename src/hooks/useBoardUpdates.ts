@@ -1,10 +1,11 @@
 import { onDisconnect, onValue, ref, update } from 'firebase/database'
-import { rdb } from '../config/firebase'
+import { db, rdb } from '../config/firebase'
 import { UserEntity } from '../providers/firebaseUserProvider'
 import { BinaryFiles, Gesture } from '@excalidraw/excalidraw/types/types'
 import useFirestore from './useFirestore'
 import { SerializedExcalidrawElement } from '../pages/board/components/excalidrawBoard/excalidrawBoard'
 import { ExcalidrawElement } from '@excalidraw/excalidraw/types/element/types'
+import { arrayUnion, doc, writeBatch } from 'firebase/firestore'
 
 type UpdatePointerPositionPayload = {
   id?: string
@@ -49,17 +50,22 @@ const useBoardUpdates = ({ instanceId }: Props) => {
       onDisconnect(ref(rdb, `pointer-update/${instanceId}/${userId}`)).remove()
     })
 
-  const updateBoardElements = (
+  const updateBoardElements = async (
     diffElements: ExcalidrawElement[],
     serializedElements: SerializedExcalidrawElement[],
     files: BinaryFiles,
   ) => {
-    updateDocField({
-      collectionId: 'boardsContent',
-      data: { elements: serializedElements, ...files },
-      id: instanceId,
-    })
+    const batch = writeBatch(db)
+
+    const elementsRef = doc(db, `boards/${instanceId}/boardContent/elements`)
+    batch.update(elementsRef, { elements: serializedElements })
+
+    const filesRef = doc(db, `boards/${instanceId}/boardContent/files`)
+    batch.update(filesRef, { files: files })
+
     update(ref(rdb, `board-update/${instanceId}`), { elements: diffElements })
+
+    return await batch.commit()
   }
 
   const handleUpdateBoardElements = (callback: (newElements: ExcalidrawElement[]) => void) => {
