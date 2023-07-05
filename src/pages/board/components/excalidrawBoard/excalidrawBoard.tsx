@@ -10,7 +10,6 @@ import {
   ExcalidrawElement,
   ExcalidrawImageElement,
 } from '@excalidraw/excalidraw/types/element/types'
-import useFirestore from '../../../../hooks/useFirestore'
 import {
   filterFilesToFirestore,
   getDiffElements,
@@ -22,7 +21,7 @@ import { BoardEntity } from '../../../boards/components/boardTable/boardTable'
 import CustomMainMenu from './customMainMenu'
 import Logo from '../../../../layout/logo'
 import AdditionalButtons from './additionalButtons'
-import { BoardContentEntity } from '../../../../hooks/useBoardRoom'
+import useBoardRoom from '../../../../hooks/useBoardRoom'
 
 export function useCallbackRefState<T>() {
   const [refValue, setRefValue] = useState<T | null>(null)
@@ -60,7 +59,7 @@ const ExcalidrawBoard = ({
     updateBoardElements,
     handleUpdateBoardElements,
   } = useBoardUpdates({ instanceId })
-  const { getSingleCollectionItem } = useFirestore()
+  const { getBoardFiles } = useBoardRoom()
   const [excalidrawAPI, excalidrawRefCallback] = useCallbackRefState<ExcalidrawImperativeAPI>()
   const [oldElementsMap, setOldElementsMap] = useState(
     new Map(elements?.map((e) => [e.id, e.version])),
@@ -69,6 +68,8 @@ const ExcalidrawBoard = ({
 
   useEffect(() => {
     if (excalidrawAPI) {
+      if (files) excalidrawAPI?.addFiles(Object.values(files))
+
       handleUpdatePointerPosition(user.id, (data) => {
         const map = excalidrawAPI.getAppState().collaborators
         Object.values(data).map((us) => {
@@ -100,10 +101,9 @@ const ExcalidrawBoard = ({
 
           if (newFilesElements.length) {
             setOldFilesSet(newSet)
-            getSingleCollectionItem<BoardContentEntity>({
-              collectionId: 'boardsContent',
-              id: `${instanceId}`,
-            }).then((data) => excalidrawAPI?.addFiles(Object.values(data.files)))
+            getBoardFiles(boardData.boardId).then((files) =>
+              excalidrawAPI?.addFiles(Object.values(files)),
+            )
           }
           updateOldElementsMap(diffs)
           excalidrawAPI?.updateScene({ elements: [...newMap.values()] })
