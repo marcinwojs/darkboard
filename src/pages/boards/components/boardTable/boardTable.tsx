@@ -82,7 +82,7 @@ const BoardTable = ({ boards, user }: Props) => {
                   <AvatarGroup users={board.users} creatorId={board.creatorId} />
                 </CenteredCell>
                 <CenteredCell padding={'none'}>
-                  <ControlButtonsGroup board={board} userId={user.id} />
+                  <ControlButtonsGroup board={board} user={user} />
                 </CenteredCell>
               </TableRow>
             ))}

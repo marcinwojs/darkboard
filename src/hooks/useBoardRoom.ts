@@ -65,32 +65,16 @@ const useBoardRoom = () => {
     }
   }
 
-  const leaveRoom = (roomId: string, userId: string) => {
-    return getSingleCollectionItem<BoardEntity>({ collectionId: 'boards', id: roomId }).then(
-      (board) => {
-        if (board.users.find((user: { id: string }) => user.id === userId)) {
-          return getUserData(userId).then((userData) => {
-            return updateDocField({
-              collectionId: 'boards',
-              id: roomId,
-              data: {
-                ...board,
-                users: arrayRemove({
-                  name: userData.firstName,
-                  id: userData.id,
-                }),
-              },
-            }).then(() => {
-              return updateUserData(userId, {
-                userBoards: arrayRemove(roomId) as unknown as string[],
-              }).then(() => true)
-            })
-          })
-        } else {
-          throw new Error('User not found in board list')
-        }
-      },
-    )
+  const leaveRoom = async (boardId: string, userData: { id: string; name: string }) => {
+    const batch = writeBatch(db)
+
+    const nycRef = doc(db, `boards/${boardId}`)
+    batch.update(nycRef, { users: arrayRemove(userData) })
+
+    const boardCreator = doc(db, `users/${userData.id}`)
+    batch.update(boardCreator, { userBoards: arrayRemove(boardId) })
+
+    return await batch.commit().then(() => 'The owner of the board got a request for access')
   }
 
   const getBoardElements = (boardId: string) => {

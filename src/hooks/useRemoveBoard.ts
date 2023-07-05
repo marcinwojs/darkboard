@@ -1,28 +1,17 @@
-import useFirestore from './useFirestore'
-import useFirestoreUser from './useFirestoreUser'
+import { arrayRemove, doc, writeBatch } from 'firebase/firestore'
+import { db } from '../config/firebase'
 
 const useRemoveBoard = () => {
-  const { updateUserData, getUserData } = useFirestoreUser()
-  const { removeFromDoc } = useFirestore()
+  const removeBoard = async (userId: string, boardId: string) => {
+    const batch = writeBatch(db)
 
-  const removeBoard = (userId: string, id: string) => {
-    return new Promise(function (myResolve, myReject) {
-      return removeFromDoc({
-        collectionId: 'boards',
-        id,
-      })
-        .then(() => {
-          getUserData(userId)
-            .then((userData) => {
-              updateUserData(userData.id, {
-                userBoards: userData.userBoards.filter((boardId) => boardId !== id),
-              })
-            })
-            .catch((reason) => myReject(reason))
-          myResolve(true)
-        })
-        .catch((reason) => myReject(reason))
-    })
+    const nycRef = doc(db, `boards/${boardId}`)
+    batch.delete(nycRef)
+
+    const boardCreator = doc(db, `users/${userId}`)
+    batch.update(boardCreator, { userBoards: arrayRemove(boardId) })
+
+    return await batch.commit()
   }
 
   return { removeBoard }

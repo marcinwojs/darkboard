@@ -12,13 +12,14 @@ import { BoardEntity } from './boardTable'
 import RequestsDialog from '../../../board/components/requestsDialog/requestsDialog'
 import { collection, onSnapshot, query } from 'firebase/firestore'
 import { db } from '../../../../config/firebase'
+import { UserEntity } from '../../../../providers/firebaseUserProvider'
 
 type Props = {
   board: BoardEntity
-  userId: string
+  user: UserEntity
 }
 
-const ControlButtonsGroup = ({ userId, board }: Props) => {
+const ControlButtonsGroup = ({ board, user }: Props) => {
   const { boardId, creatorId } = board
   const navigate = useNavigate()
   const [error, setError] = useState('')
@@ -49,8 +50,8 @@ const ControlButtonsGroup = ({ userId, board }: Props) => {
   const onRemoveBoard = async (id: string) => {
     const confirm = await confirmRemove()
 
-    if (userId && confirm) {
-      removeBoard(userId, id).catch((error) => {
+    if (user.id && confirm) {
+      removeBoard(user.id, id).catch((error) => {
         setError(handleError(error.code, error))
       })
     }
@@ -59,8 +60,8 @@ const ControlButtonsGroup = ({ userId, board }: Props) => {
   const onLeaveBoard = async (id: string) => {
     const confirm = await confirmLeave()
 
-    if (userId && confirm) {
-      leaveRoom(id, userId).catch((error) => {
+    if (user.id && confirm) {
+      leaveRoom(id, { id: user.id, name: user.firstName }).catch((error) => {
         setError(handleError(error.code, error))
       })
     }
@@ -85,7 +86,7 @@ const ControlButtonsGroup = ({ userId, board }: Props) => {
           <Login fontSize={'small'} />
         </TooltipButton>
         <ShareButton size={'small'} id={boardId} />
-        {creatorId === userId ? (
+        {creatorId === user.id ? (
           <>
             <TooltipButton tipText={'Delete Board'} onClick={() => onRemoveBoard(boardId)}>
               <DeleteForever fontSize={'small'} />
