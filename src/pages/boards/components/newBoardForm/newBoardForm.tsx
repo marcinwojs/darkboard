@@ -67,6 +67,8 @@ const NewBoardForm = ({ size, onSuccess }: Props) => {
       try {
         const boardId = await createBoard(formState)
 
+
+        console.log(boardId)
         onSuccess && onSuccess()
         navigate(`/board/${boardId}`)
         setLoading(false)

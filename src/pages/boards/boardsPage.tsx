@@ -12,13 +12,8 @@ const BoardsPage = () => {
   const [boards, setBoards] = useState<BoardEntity[]>([])
 
   useEffect(() => {
-    const userSearch = {
-      id: user?.id || '',
-      name: user?.firstName || '',
-    }
-
-    if (user) {
-      const q = query(collection(db, 'boards'), where('users', 'array-contains', userSearch))
+    if (user && user.userBoards.length > 0) {
+      const q = query(collection(db, 'boards'), where('boardId', 'in', user.userBoards))
       onSnapshot(q, (querySnapshot) => {
         const myBoards: BoardEntity[] = []
 

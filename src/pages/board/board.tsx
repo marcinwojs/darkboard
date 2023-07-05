@@ -19,13 +19,13 @@ const Board = () => {
   const [allowJoin, setAllowJoin] = useState(false)
   const [error, setError] = useState('')
   const { user } = useUserContext()
-  const { getBoardInitialData } = useBoardRoom()
+  const { getBoardElements, getBoardFiles } = useBoardRoom()
   const instanceId = useParams()?.boardId as string
   const navigate = useNavigate()
 
   useEffect(() => {
     if (user) {
-      const unsubscribe = onSnapshot(doc(db, 'boards', instanceId), (doc) => {
+      const unsubscribe = onSnapshot(doc(db, `boards/${instanceId}`), (doc) => {
         const board = doc.data() as BoardEntity
 
         if (board) {
@@ -33,7 +33,8 @@ const Board = () => {
           const accessToBoard = user.userBoards.includes(board.boardId)
 
           if (accessToBoard) {
-            getBoardInitialData(instanceId).then((initialData) => setInitData(initialData))
+            getBoardElements(instanceId).then((elements) => setInitData({ elements }))
+            getBoardFiles(instanceId).then((files) => setInitData({ ...initData, files }))
           }
 
           setAllowJoin(accessToBoard)

@@ -5,7 +5,7 @@ import { BoardEntity } from '../pages/boards/components/boardTable/boardTable'
 import { SerializedExcalidrawElement } from '../pages/board/components/excalidrawBoard/excalidrawBoard'
 import { BinaryFiles } from '@excalidraw/excalidraw/types/types'
 import { v4 as uuidv4 } from 'uuid'
-import { deserializeFbaseToExc } from '../shared/utils'
+import { convertFromDateObject } from '../shared/utils'
 import useNotifications, { NotificationTypes } from './useNotifications'
 import { UserEntity } from '../providers/firebaseUserProvider'
 
@@ -27,7 +27,7 @@ export type AccessRequestData = {
 }
 type RequestBase = {
   id: string
-  date: string
+  date: { seconds: number; nanoseconds: number }
 }
 
 export type AccessRequestEntity = AccessRequestData & RequestBase
@@ -97,15 +97,20 @@ const useBoardRoom = () => {
     )
   }
 
-  const getBoardInitialData = (boardId: string) => {
-    return getSingleCollectionItem<BoardContentEntity>({
-      collectionId: 'boardsContent',
-      id: boardId,
-    }).then((initialData) => {
-      return {
-        elements: deserializeFbaseToExc(initialData.elements),
-        files: initialData.files,
-      }
+  const getBoardElements = (boardId: string) => {
+    return getSingleCollectionItem<{ elements: BoardContentEntity['elements'] }>({
+      collectionId: `boards/${boardId}/boardContent`,
+      id: 'elements',
+    }).then(({ elements }) => {
+      return elements
+    })
+  }
+  const getBoardFiles = (boardId: string) => {
+    return getSingleCollectionItem<{ files: BoardContentEntity['files'] }>({
+      collectionId: `boards/${boardId}/boardContent`,
+      id: 'files',
+    }).then(({ files }) => {
+      return files
     })
   }
 
@@ -114,10 +119,12 @@ const useBoardRoom = () => {
     user: UserEntity,
     requestData: AccessRequestData,
   ) => {
+    const requestId = uuidv4()
+    const currentDate = convertFromDateObject(new Date())
     const request: AccessRequestEntity = {
       ...requestData,
-      id: uuidv4(),
-      date: 'now',
+      id: requestId,
+      date: currentDate,
     }
 
     return getSingleCollectionItem<BoardEntity>({ id: board.boardId, collectionId: 'boards' }).then(
@@ -158,7 +165,14 @@ const useBoardRoom = () => {
     })
   }
 
-  return { joinRoom, leaveRoom, getBoardInitialData, createAccessRequest, removeRequest }
+  return {
+    joinRoom,
+    leaveRoom,
+    getBoardElements,
+    getBoardFiles,
+    createAccessRequest,
+    removeRequest,
+  }
 }
 
 export default useBoardRoom
